@@ -1,0 +1,368 @@
+// Views reused across portals
+import { sb } from '../supabase.js';
+import { CONFIG } from '../config.js';
+import { must, pct, notifyUsers, callFunction } from '../api.js';
+import {
+  $, $$, esc, icon, LOGO, toast, fail, modal, setBusy, badge, tableHtml, emptyState, loadingBlock, errorBlock,
+  fmtDate, fmtDateTime, fmtMoney, num, today, gradeFor, formHtml, readForm, initials,
+} from '../ui.js';
+import { ROLE_LABEL } from '../auth.js';
+
+const opt = (rows, v, l) => rows.map((r) => `<option value="${esc(r[v])}">${esc(typeof l === 'function' ? l(r) : r[l])}</option>`).join('');
+
+/* =========================================================
+   ATTENDANCE - take / edit for one class and date
+   ========================================================= */
+export async function attendanceTaker(view, ctx, { classOptions }) {
+  const classes = await classOptions();
+  if (!classes.length) { view.innerHTML = emptyState('No classes available', 'You have not been assigned to any class yet.', 'class'); return; }
+  view.innerHTML = `
+    <div class="page-head"><div><h2>Take attendance</h2><p class="muted">Mark each student present, absent or late, then save. Parents of absent students are notified.</p></div></div>
+    <div class="toolbar">
+      <select id="at-class" class="input sm" aria-label="Class">${opt(classes, 'value', 'label')}</select>
+      <input type="date" id="at-date" class="input sm" value="${today()}" max="${today()}" aria-label="Date">
+      <button class="btn ghost sm" id="at-all">Mark all present</button>
+    </div>
+    <div class="card flush"><div id="at-body"></div></div>
+    <div class="pager"><span id="at-sum" class="muted"></span><button class="btn primary" id="at-save">Save attendance</button></div>`;
+  const body = $('#at-body', view), sum = $('#at-sum', view), save = $('#at-save', view);
+  let students = [];
+
+  const updateSum = () => {
+    const c = { present: 0, absent: 0, late: 0 };
+    $$('input[type=radio]:checked', body).forEach((r) => c[r.value]++);
+    sum.textContent = `${c.present} present, ${c.absent} absent, ${c.late} late of ${students.length}`;
+  };
+
+  async function load() {
+    body.innerHTML = loadingBlock();
+    try {
+      const classId = $('#at-class', view).value, date = $('#at-date', view).value;
+      students = await must(sb.from('students').select('id,full_name,student_no').eq('class_id', classId).eq('status', 'active').order('full_name').limit(500));
+      const existing = students.length ? await must(sb.from('attendance').select('student_id,status,note').eq('class_id', classId).eq('attendance_date', date)) : [];
+      const by = Object.fromEntries(existing.map((a) => [a.student_id, a]));
+      if (!students.length) { body.innerHTML = emptyState('No students in this class', 'Assign students to the class first.', 'users'); sum.textContent = ''; save.disabled = true; return; }
+      save.disabled = false;
+      body.innerHTML = `<div class="table-wrap"><table class="table"><thead><tr><th>Student</th><th>Status</th><th>Note</th></tr></thead><tbody>${students.map((s) => {
+        const st = by[s.id]?.status || 'present';
+        return `<tr data-id="${s.id}"><td><b>${esc(s.full_name)}</b><span class="sub">${esc(s.student_no)}</span></td>
+          <td><div class="seg" role="radiogroup" aria-label="Status for ${esc(s.full_name)}">
+            ${[['present', 'P', 'p'], ['absent', 'A', 'a'], ['late', 'L', 'l']].map(([v, t, k]) => `<label><input type="radio" name="s_${s.id}" value="${v}" ${st === v ? 'checked' : ''}><span class="${k}" title="${v}">${t}</span></label>`).join('')}
+          </div></td>
+          <td><input class="input" name="n_${s.id}" maxlength="120" value="${esc(by[s.id]?.note || '')}" placeholder="Optional note"></td></tr>`;
+      }).join('')}</tbody></table></div>`;
+      updateSum();
+    } catch (e) { body.innerHTML = errorBlock(e); $('[data-retry]', body)?.addEventListener('click', load); }
+  }
+  body.addEventListener('change', updateSum);
+  $('#at-class', view).onchange = load; $('#at-date', view).onchange = load;
+  $('#at-all', view).onclick = () => { $$('input[value=present]', body).forEach((r) => (r.checked = true)); updateSum(); };
+  save.onclick = async () => {
+    if (!students.length) return;
+    const classId = $('#at-class', view).value, date = $('#at-date', view).value;
+    if (!date) return toast('Choose a date', 'error');
+    const rows = students.map((s) => ({
+      student_id: s.id, class_id: classId, attendance_date: date, marked_by: ctx.user.id,
+      status: $(`input[name="s_${s.id}"]:checked`, body)?.value || 'present',
+      note: ($(`input[name="n_${s.id}"]`, body)?.value || '').trim() || null,
+    }));
+    setBusy(save, true, 'Saving');
+    try {
+      await must(sb.from('attendance').upsert(rows, { onConflict: 'student_id,attendance_date' }));
+      let msg = 'Attendance saved';
+      if (rows.some((r) => r.status === 'absent')) {
+        const { data, error } = await sb.rpc('notify_absent', { p_class: classId, p_date: date });
+        const ids = Array.isArray(data) ? data : [];
+        if (!error && ids.length) {
+          msg += `, ${ids.length} parent${ids.length === 1 ? '' : 's'} notified`;
+          if (CONFIG.EXTERNAL_NOTIFICATIONS) callFunction('notify-external', { user_ids: ids, title: 'Absence alert', body: `Your child was marked absent on ${date}.` }).catch((e2) => console.warn('External notification failed', e2));
+        }
+      }
+      toast(msg);
+    } catch (e) { fail(e); } finally { setBusy(save, false); }
+  };
+  await load();
+}
+
+/* =========================================================
+   SCORE ENTRY - per exam and subject
+   ========================================================= */
+export async function scoreEntry(view, ctx, { teacherId = null, isAdmin = false } = {}) {
+  const exams = await must(sb.from('examinations').select('*, classes(name)').order('created_at', { ascending: false }).limit(300));
+  if (!exams.length) { view.innerHTML = emptyState('No examinations yet', isAdmin ? 'Create an examination first, then enter scores here.' : 'No examinations exist for your classes yet.', 'file'); return; }
+  view.innerHTML = `
+    <div class="page-head"><div><h2>Enter scores</h2><p class="muted">Grades are calculated automatically from the percentage.</p></div></div>
+    <div class="toolbar">
+      <select id="se-exam" class="input sm" aria-label="Examination">${opt(exams, 'id', (e) => `${e.name} - ${e.classes?.name || ''} (${e.term})${e.is_published ? ' - published' : ''}`)}</select>
+      <select id="se-sub" class="input sm" aria-label="Subject"></select>
+    </div>
+    <div id="se-note"></div>
+    <div class="card flush"><div id="se-body"></div></div>
+    <div class="pager"><span class="muted" id="se-sum"></span><button class="btn primary" id="se-save">Save scores</button></div>`;
+  const body = $('#se-body', view), save = $('#se-save', view), subSel = $('#se-sub', view), examSel = $('#se-exam', view);
+  let exam, students = [];
+
+  async function loadSubjects() {
+    exam = exams.find((e) => e.id === examSel.value);
+    let q = sb.from('teacher_assignments').select('subject_id, subjects(name,code)').eq('class_id', exam.class_id);
+    if (!isAdmin && teacherId) q = q.eq('teacher_id', teacherId);
+    const rows = await must(q);
+    subSel.innerHTML = rows.length ? opt(rows, 'subject_id', (r) => r.subjects?.name) : '<option value="">No subjects assigned</option>';
+    await loadScores();
+  }
+  async function loadScores() {
+    body.innerHTML = loadingBlock();
+    $('#se-note', view).innerHTML = '';
+    if (!subSel.value) { body.innerHTML = emptyState('No subject to score', 'Assign a subject to this class first (Class subjects).', 'book'); save.disabled = true; return; }
+    try {
+      students = await must(sb.from('students').select('id,full_name,student_no').eq('class_id', exam.class_id).eq('status', 'active').order('full_name').limit(500));
+      const res = await must(sb.from('exam_results').select('student_id,score,remarks').eq('exam_id', exam.id).eq('subject_id', subSel.value));
+      const by = Object.fromEntries(res.map((r) => [r.student_id, r]));
+      const locked = exam.is_published && !isAdmin;
+      if (locked) $('#se-note', view).innerHTML = `<div class="notice">${icon('lock', 18)}<span>These results are published, so scores can no longer be changed. Ask an administrator for a correction.</span></div>`;
+      save.disabled = locked || !students.length;
+      if (!students.length) { body.innerHTML = emptyState('No students in this class', '', 'users'); return; }
+      body.innerHTML = `<div class="table-wrap"><table class="table"><thead><tr><th>Student</th><th class="num">Score / ${num(exam.max_score)}</th><th>Grade</th><th>Remarks</th></tr></thead><tbody>${students.map((s) => `
+        <tr data-id="${s.id}"><td><b>${esc(s.full_name)}</b><span class="sub">${esc(s.student_no)}</span></td>
+        <td class="num"><input class="input score-input" type="number" min="0" max="${exam.max_score}" step="0.01" name="sc_${s.id}" value="${by[s.id]?.score ?? ''}" ${locked ? 'disabled' : ''} aria-label="Score for ${esc(s.full_name)}"></td>
+        <td data-grade="${s.id}">${by[s.id] ? badge(gradeFor(pct(by[s.id].score, exam.max_score)).grade, 'info') : '-'}</td>
+        <td><input class="input" name="rm_${s.id}" maxlength="120" value="${esc(by[s.id]?.remarks || '')}" ${locked ? 'disabled' : ''} placeholder="Optional"></td></tr>`).join('')}</tbody></table></div>`;
+      updateCount();
+    } catch (e) { body.innerHTML = errorBlock(e); }
+  }
+  const updateCount = () => { $('#se-sum', view).textContent = `${$$('input[name^=sc_]', body).filter((i) => i.value !== '').length} of ${students.length} scored`; };
+  body.addEventListener('input', (e) => {
+    if (!e.target.name?.startsWith('sc_')) return;
+    const id = e.target.name.slice(3), cell = $(`[data-grade="${id}"]`, body);
+    cell.innerHTML = e.target.value === '' ? '-' : badge(gradeFor(pct(e.target.value, exam.max_score)).grade, 'info');
+    updateCount();
+  });
+  examSel.onchange = loadSubjects; subSel.onchange = loadScores;
+  save.onclick = async () => {
+    const rows = [];
+    for (const s of students) {
+      const input = $(`input[name="sc_${s.id}"]`, body);
+      if (!input || input.value === '') continue;
+      const score = Number(input.value);
+      if (isNaN(score) || score < 0 || score > Number(exam.max_score)) { input.focus(); return toast(`Score for ${s.full_name} must be between 0 and ${exam.max_score}`, 'error'); }
+      rows.push({ exam_id: exam.id, student_id: s.id, subject_id: subSel.value, score, remarks: ($(`input[name="rm_${s.id}"]`, body)?.value || '').trim() || null });
+    }
+    if (!rows.length) return toast('Enter at least one score', 'info');
+    setBusy(save, true, 'Saving');
+    try { await must(sb.from('exam_results').upsert(rows, { onConflict: 'exam_id,student_id,subject_id' })); toast(`${rows.length} score${rows.length === 1 ? '' : 's'} saved`); await loadScores(); }
+    catch (e) { fail(e); } finally { setBusy(save, false); }
+  };
+  await loadSubjects();
+}
+
+/* =========================================================
+   REPORT CARD
+   ========================================================= */
+export function reportCardHtml({ student, className, exam, yearName, rows, rank, classSize }) {
+  const total = rows.reduce((a, r) => a + Number(r.score), 0);
+  const maxTotal = rows.reduce((a, r) => a + Number(r.max), 0);
+  const avg = maxTotal ? (total / maxTotal) * 100 : 0;
+  const overall = gradeFor(avg);
+  return `<div class="paper print-area">
+    <header><span class="logo">${LOGO}</span><div><h2>${esc(CONFIG.SCHOOL.name)}</h2><small>${esc(CONFIG.SCHOOL.motto)} | Student Report Card</small></div></header>
+    <div class="meta">
+      <span><b>Student:</b> ${esc(student.full_name)}</span><span><b>Student no:</b> ${esc(student.student_no)}</span>
+      <span><b>Class:</b> ${esc(className || '-')}</span><span><b>Academic year:</b> ${esc(yearName || '-')}</span>
+      <span><b>Examination:</b> ${esc(exam.name)}</span><span><b>Term:</b> ${esc(exam.term)}</span>
+    </div>
+    <table><thead><tr><th>Subject</th><th class="num">Score</th><th class="num">Out of</th><th class="num">%</th><th>Grade</th><th>Remark</th></tr></thead><tbody>
+      ${rows.map((r) => { const p = pct(r.score, r.max); return `<tr><td>${esc(r.subject)}</td><td class="num">${num(r.score, 2)}</td><td class="num">${num(r.max)}</td><td class="num">${num(p)}</td><td><b>${esc(r.grade || gradeFor(p).grade)}</b></td><td>${esc(r.remarks || gradeFor(p).remark)}</td></tr>`; }).join('')}
+    </tbody><tfoot><tr><th>Total</th><th class="num">${num(total, 2)}</th><th class="num">${num(maxTotal)}</th><th class="num">${num(avg)}</th><th>${overall.grade}</th><th>${overall.remark}</th></tr></tfoot></table>
+    <div class="meta" style="margin-top:14px"><span><b>Average:</b> ${num(avg, 1)}%</span><span><b>Overall grade:</b> ${overall.grade} (${overall.remark})</span>
+      ${rank ? `<span><b>Position in class:</b> ${rank} of ${classSize}</span>` : ''}<span><b>Subjects:</b> ${rows.length}</span></div>
+    <div class="sign"><span>Class teacher</span><span>Head teacher</span><span>Parent / guardian</span></div>
+  </div>`;
+}
+
+// Load everything needed for one student's report card for one exam
+export async function loadReportCard(examId, studentId, { withRank = false } = {}) {
+  const [exam, student] = await Promise.all([
+    must(sb.from('examinations').select('*, academic_years(name), classes(name)').eq('id', examId).single()),
+    must(sb.from('students').select('id,full_name,student_no').eq('id', studentId).single()),
+  ]);
+  const res = await must(sb.from('exam_results').select('student_id,subject_id,score,grade,remarks, subjects(name)').eq('exam_id', examId).limit(5000));
+  const mine = res.filter((r) => r.student_id === studentId).map((r) => ({ subject: r.subjects?.name, score: r.score, max: exam.max_score, grade: r.grade, remarks: r.remarks }))
+    .sort((a, b) => String(a.subject).localeCompare(String(b.subject)));
+  let rank = null, classSize = null;
+  if (withRank) {
+    const totals = {};
+    res.forEach((r) => { totals[r.student_id] = (totals[r.student_id] || 0) + Number(r.score); });
+    const sorted = Object.values(totals).sort((a, b) => b - a);
+    classSize = sorted.length; rank = sorted.indexOf(totals[studentId]) + 1 || null;
+  }
+  return { html: reportCardHtml({ student, className: exam.classes?.name, exam, yearName: exam.academic_years?.name, rows: mine, rank, classSize }), empty: !mine.length };
+}
+
+export function showPrintable(title, html) {
+  const m = modal({ title, size: 'lg', html, footer: `<button class="btn ghost" data-close>Close</button><button class="btn primary" id="do-print">${icon('printer', 16)} Print / Save as PDF</button>` });
+  $('#do-print', m.el).onclick = () => window.print();
+  return m;
+}
+
+/* =========================================================
+   RECEIPT
+   ========================================================= */
+export function receiptHtml(p, student, className, balance) {
+  return `<div class="paper print-area">
+    <header><span class="logo">${LOGO}</span><div><h2>${esc(CONFIG.SCHOOL.name)}</h2><small>Official payment receipt</small></div></header>
+    <div class="meta"><span><b>Receipt no:</b> ${esc(p.receipt_no)}</span><span><b>Date paid:</b> ${fmtDate(p.paid_on)}</span>
+      <span><b>Student:</b> ${esc(student?.full_name || '-')}</span><span><b>Student no:</b> ${esc(student?.student_no || '-')}</span>
+      <span><b>Class:</b> ${esc(className || '-')}</span><span><b>Method:</b> ${esc(String(p.method).replace('_', ' '))}</span>
+      ${p.reference ? `<span><b>Reference:</b> ${esc(p.reference)}</span>` : ''}${p.school_fees?.name ? `<span><b>For:</b> ${esc(p.school_fees.name)} (${esc(p.school_fees.term)})</span>` : ''}</div>
+    <table><thead><tr><th>Description</th><th class="num">Amount paid</th></tr></thead><tbody>
+      <tr><td>${esc(p.school_fees?.name || 'School fees payment')}${p.note ? ` - ${esc(p.note)}` : ''}</td><td class="num"><b>${fmtMoney(p.amount)}</b></td></tr></tbody></table>
+    ${balance != null ? `<p style="margin-top:12px"><b>Outstanding balance after this payment:</b> ${fmtMoney(balance)}</p>` : ''}
+    <div class="sign"><span>Received by</span><span>Parent / guardian</span></div></div>`;
+}
+
+/* =========================================================
+   STUDENT-FACING VIEWS (student portal + parent portal)
+   ========================================================= */
+export async function attendanceView(view, studentId) {
+  view.innerHTML = loadingBlock();
+  const rows = await must(sb.from('attendance').select('attendance_date,status,note').eq('student_id', studentId).order('attendance_date', { ascending: false }).limit(400));
+  if (!rows.length) { view.innerHTML = emptyState('No attendance records yet', 'Records appear here once your teacher starts taking attendance.', 'calendar'); return; }
+  const c = { present: 0, absent: 0, late: 0 }; rows.forEach((r) => c[r.status]++);
+  const rate = Math.round(((c.present + c.late) / rows.length) * 100);
+  view.innerHTML = `
+    <div class="stats">
+      <div class="stat ok"><span class="ico">${icon('check')}</span><div><b>${rate}%</b><span>Attendance rate</span></div></div>
+      <div class="stat ok"><span class="ico">${icon('calendar')}</span><div><b>${c.present}</b><span>Days present</span></div></div>
+      <div class="stat bad"><span class="ico">${icon('x')}</span><div><b>${c.absent}</b><span>Days absent</span></div></div>
+      <div class="stat gold"><span class="ico">${icon('clock')}</span><div><b>${c.late}</b><span>Days late</span></div></div>
+    </div>
+    <div class="card flush">${tableHtml({ columns: [
+      { label: 'Date', render: (r) => fmtDate(r.attendance_date) }, { label: 'Status', render: (r) => badge(r.status) }, { label: 'Note', render: (r) => esc(r.note || '') }], rows: rows.slice(0, 120) })}</div>`;
+}
+
+export async function resultsView(view, studentId) {
+  view.innerHTML = loadingBlock();
+  const [student, rows] = await Promise.all([
+    must(sb.from('students').select('id,full_name,student_no,classes(name)').eq('id', studentId).single()),
+    must(sb.from('exam_results').select('exam_id,score,grade,remarks,subjects(name),examinations(id,name,term,max_score,class_id,published_at,academic_years(name),classes(name))').eq('student_id', studentId).limit(2000)),
+  ]);
+  if (!rows.length) { view.innerHTML = emptyState('No published results yet', 'Results appear here as soon as the school publishes them.', 'file'); return; }
+  const groups = {};
+  rows.forEach((r) => { (groups[r.exam_id] ||= { exam: r.examinations, rows: [] }).rows.push(r); });
+  const list = Object.values(groups).sort((a, b) => String(b.exam.published_at).localeCompare(String(a.exam.published_at)));
+  view.innerHTML = list.map((g, i) => {
+    const total = g.rows.reduce((a, r) => a + Number(r.score), 0), max = g.rows.length * Number(g.exam.max_score);
+    const avg = max ? (total / max) * 100 : 0;
+    return `<div class="card" style="margin-bottom:16px"><div class="card-head"><div><h3>${esc(g.exam.name)}</h3><small class="muted">${esc(g.exam.term)} | ${esc(g.exam.academic_years?.name || '')} | ${esc(g.exam.classes?.name || '')}</small></div>
+      <div class="head-actions"><span class="badge info">Average ${num(avg)}% | Grade ${gradeFor(avg).grade}</span><button class="btn ghost sm" data-card="${i}">${icon('printer', 15)} Report card</button></div></div>
+      ${tableHtml({ columns: [{ label: 'Subject', render: (r) => esc(r.subjects?.name) }, { label: 'Score', cls: 'num', render: (r) => `${num(r.score, 2)} / ${num(g.exam.max_score)}` }, { label: 'Grade', render: (r) => badge(r.grade, 'info') }, { label: 'Remarks', render: (r) => esc(r.remarks || '') }], rows: g.rows.sort((a, b) => String(a.subjects?.name).localeCompare(String(b.subjects?.name))) })}</div>`;
+  }).join('');
+  view.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-card]'); if (!b) return;
+    const g = list[Number(b.dataset.card)];
+    showPrintable('Report card', reportCardHtml({
+      student: { full_name: student.full_name, student_no: student.student_no }, className: g.exam.classes?.name, exam: g.exam, yearName: g.exam.academic_years?.name,
+      rows: g.rows.map((r) => ({ subject: r.subjects?.name, score: r.score, max: g.exam.max_score, grade: r.grade, remarks: r.remarks })).sort((a, b2) => String(a.subject).localeCompare(String(b2.subject))),
+    }));
+  });
+}
+
+export async function feesView(view, studentId, ctx = null) {
+  view.innerHTML = loadingBlock();
+  const [bal, student, pays, claims] = await Promise.all([
+    must(sb.from('student_fee_balances').select('*').eq('student_id', studentId).maybeSingle()),
+    must(sb.from('students').select('id,full_name,student_no,class_id,classes(name)').eq('id', studentId).single()),
+    must(sb.from('fee_payments').select('*, school_fees(name,term)').eq('student_id', studentId).order('paid_on', { ascending: false }).limit(200)),
+    ctx ? must(sb.from('payment_claims').select('*').eq('student_id', studentId).order('created_at', { ascending: false }).limit(30)) : [],
+  ]);
+  const fees = student.class_id ? await must(sb.from('school_fees').select('*').eq('class_id', student.class_id).order('due_date')) : [];
+  const total = Number(bal?.total_fees || 0), paid = Number(bal?.total_paid || 0), due = Number(bal?.balance || 0);
+  const share = total ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+  const claimsHtml = ctx ? `<div class="card flush" style="margin-top:16px"><div class="card-head pad"><div><h3>Payments you reported</h3><small class="muted">Paid by mobile money or bank transfer? Report it here and the school will confirm it.</small></div><button class="btn primary sm" id="fv-report">${icon('plus', 15)} Report a payment</button></div>
+      ${claims.length ? tableHtml({ columns: [{ label: 'Date', render: (c) => fmtDate(c.paid_on) }, { label: 'Reference', render: (c) => esc(c.reference) }, { label: 'Amount', cls: 'num', render: (c) => fmtMoney(c.amount) }, { label: 'Status', render: (c) => badge(c.status, c.status === 'approved' ? 'ok' : c.status === 'rejected' ? 'bad' : 'warn') + (c.review_note ? `<span class="sub">${esc(c.review_note)}</span>` : '') }], rows: claims }) : ''}</div>` : '';
+  view.innerHTML = `
+    <div class="stats">
+      <div class="stat"><span class="ico">${icon('wallet')}</span><div><b>${fmtMoney(total)}</b><span>Total fees</span></div></div>
+      <div class="stat ok"><span class="ico">${icon('check')}</span><div><b>${fmtMoney(paid)}</b><span>Paid</span></div></div>
+      <div class="stat ${due > 0 ? 'bad' : 'ok'}"><span class="ico">${icon('alert')}</span><div><b>${fmtMoney(Math.max(due, 0))}</b><span>Outstanding</span></div></div>
+    </div>
+    <div class="card" style="margin-bottom:16px"><div class="card-head"><h3>Payment progress</h3><span class="muted">${share}% paid</span></div><div class="bar ${due > 0 ? 'warn' : ''}"><i style="width:${share}%"></i></div></div>
+    <div class="grid cols-2">
+      <div class="card flush"><div class="pad"><h3>Fee structure</h3></div>${tableHtml({ columns: [{ label: 'Fee', render: (f) => `${esc(f.name)}<span class="sub">${esc(f.term)}</span>` }, { label: 'Due', render: (f) => fmtDate(f.due_date) }, { label: 'Amount', cls: 'num', render: (f) => fmtMoney(f.amount) }], rows: fees, empty: 'No fees set for this class yet' })}</div>
+      <div class="card flush"><div class="pad"><h3>Payment history</h3></div>${tableHtml({ columns: [{ label: 'Receipt', render: (p) => esc(p.receipt_no) }, { label: 'Date', render: (p) => fmtDate(p.paid_on) }, { label: 'Amount', cls: 'num', render: (p) => fmtMoney(p.amount) }, { label: '', cls: 'actions', render: (p) => `<button class="icon-btn" data-rc="${p.id}" title="View receipt" aria-label="View receipt">${icon('receipt', 16)}</button>` }], rows: pays, empty: 'No payments recorded yet' })}</div>
+    </div>${claimsHtml}`;
+  $('#fv-report', view)?.addEventListener('click', () => reportPayment(student, fees, ctx, () => feesView(view, studentId, ctx)));
+  view.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rc]'); if (!b) return;
+    const p = pays.find((x) => x.id === b.dataset.rc);
+    showPrintable('Payment receipt', receiptHtml(p, student, student.classes?.name, due));
+  });
+}
+
+export async function announcementsView(view) {
+  view.innerHTML = loadingBlock();
+  const rows = await must(sb.from('announcements').select('*').eq('published', true).order('created_at', { ascending: false }).limit(60));
+  if (!rows.length) { view.innerHTML = emptyState('No announcements yet', 'School news and notices will appear here.', 'megaphone'); return; }
+  view.innerHTML = `<div class="grid">${rows.map((a) => `<article class="card"><div class="card-head"><h3>${esc(a.title)}</h3>${badge(a.kind, a.kind === 'event' ? 'info' : 'muted')}</div>
+    <p style="white-space:pre-wrap">${esc(a.body)}</p><small class="muted">${a.event_date ? `Event date: ${fmtDate(a.event_date)} | ` : ''}Posted ${fmtDateTime(a.created_at)}</small></article>`).join('')}</div>`;
+}
+
+export async function profileView(view, ctx) {
+  const p = ctx.profile;
+  view.innerHTML = `<div class="grid cols-2">
+    <div class="card"><h3>My details</h3>
+      ${formHtml([{ name: 'full_name', label: 'Full name', required: true, full: true }, { name: 'phone', label: 'Phone', type: 'tel', full: true }, { name: 'email', label: 'Email (sign-in)', readonly: true, full: true }, { name: 'role', label: 'Role', readonly: true, full: true }], { ...p, role: ROLE_LABEL[p.role] })}
+      <p style="margin-top:14px"><button class="btn primary" id="pf-save">Save changes</button></p></div>
+    <div class="card"><h3>Change password</h3>
+      ${formHtml([{ name: 'current', label: 'Current password', type: 'password', required: true, full: true }, { name: 'password', label: 'New password', type: 'password', required: true, minlength: 8, full: true, help: 'At least 8 characters.' }, { name: 'confirm', label: 'Confirm new password', type: 'password', required: true, full: true }])}
+      <p style="margin-top:14px"><button class="btn primary" id="pw-save">Update password</button></p></div></div>`;
+  const [f1, f2] = $$('form', view);
+  const fields1 = [{ name: 'full_name', label: 'Full name', required: true }, { name: 'phone', label: 'Phone', type: 'tel' }];
+  const fields2 = [{ name: 'current', label: 'Current password', type: 'password', required: true }, { name: 'password', label: 'New password', type: 'password', required: true, minlength: 8 }, { name: 'confirm', label: 'Confirm', type: 'password', required: true }];
+  $('#pf-save', view).onclick = async (e) => {
+    const { ok, values } = readForm(f1, fields1); if (!ok) return;
+    setBusy(e.currentTarget, true, 'Saving');
+    try { await must(sb.from('profiles').update(values).eq('id', p.id)); Object.assign(p, values); toast('Profile updated'); } catch (err) { fail(err); } finally { setBusy(e.currentTarget, false); }
+  };
+  $('#pw-save', view).onclick = async (e) => {
+    const { ok, values } = readForm(f2, fields2); if (!ok) return;
+    if (values.password !== values.confirm) return toast('The two passwords do not match', 'error');
+    setBusy(e.currentTarget, true, 'Updating');
+    try { const { error } = await sb.auth.updateUser({ password: values.password, current_password: values.current }); if (error) throw error; f2.reset(); toast('Password updated'); } catch (err) { fail(err); } finally { setBusy(e.currentTarget, false); }
+  };
+}
+
+// Small header with the student's name/class for parent + student overviews
+export const childHeader = (s) => `<div class="card" style="margin-bottom:16px;display:flex;gap:14px;align-items:center"><span class="avatar" style="width:52px;height:52px;font-size:18px">${esc(initials(s.full_name))}</span>
+  <div><h3 style="margin:0">${esc(s.full_name)}</h3><span class="muted">${esc(s.student_no)} | ${esc(s.classes?.name || 'No class yet')} | ${badge(s.status)}</span></div></div>`;
+
+/* A family reports a payment made outside the school (mobile money, bank). The office verifies it. */
+function reportPayment(student, fees, ctx, done) {
+  const fields = [
+    { name: 'fee_id', label: 'Fee paid for', type: 'select', blank: 'General payment', full: true, options: fees.map((f) => ({ value: f.id, label: `${f.name} (${f.term}) - ${fmtMoney(f.amount)}` })) },
+    { name: 'amount', label: 'Amount paid', type: 'number', required: true, min: 0.01, step: '0.01' },
+    { name: 'method', label: 'How you paid', type: 'select', required: true, options: [{ value: 'mobile_money', label: 'Mobile money' }, { value: 'bank_transfer', label: 'Bank transfer' }, { value: 'cash', label: 'Cash deposit' }] },
+    { name: 'reference', label: 'Transaction ID / reference', required: true, maxlength: 80, help: 'The code in your payment confirmation message.' },
+    { name: 'paid_on', label: 'Date paid', type: 'date', required: true, max: today() },
+    { name: 'note', label: 'Note (optional)', type: 'textarea', rows: 2, full: true, maxlength: 500 },
+  ];
+  const m = modal({ title: `Report a payment for ${student.full_name}`, size: 'md',
+    html: `${formHtml(fields, { method: 'mobile_money', paid_on: today() })}<div class="field" style="margin-top:12px"><label for="rp-proof">Screenshot or receipt (optional)</label><input id="rp-proof" class="input" type="file" accept="application/pdf,image/jpeg,image/png"><small class="help">PDF, JPG or PNG up to 5 MB.</small></div>`,
+    footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="rp-send">Send to the school</button>` });
+  $('#rp-send', m.el).onclick = async (e) => {
+    const { ok, values } = readForm($('form', m.el), fields); if (!ok) return;
+    const file = $('#rp-proof', m.el).files[0];
+    if (file && (file.size > 5 * 1024 * 1024 || !/^(application\/pdf|image\/(jpeg|png))$/.test(file.type))) return toast('The proof must be a PDF, JPG or PNG up to 5 MB', 'error');
+    setBusy(e.currentTarget, true, 'Sending');
+    try {
+      let proof_path = null;
+      if (file) {
+        proof_path = `${ctx.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-60)}`;
+        const { error } = await sb.storage.from('payment-proofs').upload(proof_path, file, { contentType: file.type });
+        if (error) throw error;
+      }
+      await must(sb.from('payment_claims').insert({ ...values, student_id: student.id, submitted_by: ctx.user.id, proof_path }).select('id'));
+      toast('Sent. The school will confirm your payment shortly.'); m.close(); done();
+    } catch (err) { fail(err); setBusy(e.currentTarget, false); }
+  };
+}
