@@ -62,7 +62,7 @@ export function openCreateAccount(ctx, preset = {}, onDone = () => {}) {
     try {
       const res = await callFunction('admin-users', body);
       m.body.innerHTML = `<div class="state"><span class="badge ok">Account created</span><h4>${esc(values.full_name)} can now sign in</h4>
-        <p>Email: <b>${esc(values.email)}</b><br>Temporary password: <b>${esc(values.password)}</b></p><p class="muted">${res?.emailed ? `The login details were also emailed to ${esc(values.email)}.` : 'No email was sent (email is not set up). Copy these details now and send them to the user.'} The password is not shown again.</p></div>`;
+        <p>Email: <b>${esc(values.email)}</b><br>Temporary password: <b>${esc(values.password)}</b></p><p class="muted">${res?.emailed ? `The login details were also emailed to ${esc(values.email)}.` : `No email was sent${res?.email_error ? ': ' + esc(res.email_error) : ''}. Copy these details now and send them to the user.`} The password is not shown again.</p></div>`;
       m.foot.innerHTML = `<button class="btn primary" data-close>Done</button>`;
       onDone();
     } catch (err) { fail(err); setBusy(e.currentTarget, false); }
