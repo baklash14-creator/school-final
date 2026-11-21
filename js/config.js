@@ -10,11 +10,11 @@ export const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_zIzeeT7lTCErY0131aEPuQ_Iu7-Iwjb',
 
   SCHOOL: {
-    name: 'Alfrian Int'l Academy & Sec. School',
+    name: 'Bakarr School',
     motto: 'Knowledge, character and service',
     email: 'info@bakarrschool.edu',
     phone: '+000 000 000 000',
-    address: 'New york ',
+    address: 'Add your school address in js/config.js',
     hours: 'Monday to Friday, 7:30 am to 4:00 pm',
   },
 
