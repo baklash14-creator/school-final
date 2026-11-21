@@ -117,6 +117,7 @@ $('#apply-go').onclick = async (e) => {
     const reference = refCode();
     const { error } = await sb.from('admission_applications').insert({ ...values, reference });
     if (error) throw error;
+    sb.functions.invoke('application-received', { body: { reference } }).then(() => {}, () => {}); // confirmation email (optional)
     $('#apply-card').innerHTML = `<div class="s-success"><span class="badge ok">Application received</span><h3>Thank you, ${esc(values.parent_name.split(' ')[0])}</h3><p>Your reference code is</p><div class="ref" id="ref">${reference}</div>
       <p class="muted">Keep this code. Use it in "Track an application" to check the status. We will contact you on ${esc(values.parent_phone)}.</p><button class="btn ghost sm" id="copy-ref">Copy code</button></div>`;
     $('#copy-ref').onclick = () => navigator.clipboard?.writeText(reference).then(() => toast('Reference copied'), () => toast(reference, 'info'));
