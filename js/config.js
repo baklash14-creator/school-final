@@ -6,8 +6,8 @@
 //  2) Edit the school details; they appear on the public website.
 // ---------------------------------------------------------------
 export const CONFIG = {
-  SUPABASE_URL: 'https://YOUR-PROJECT-REF.supabase.co',
-  SUPABASE_ANON_KEY: 'YOUR-ANON-PUBLIC-KEY',
+  SUPABASE_URL: 'https://piojryombpoyrrfkrgew.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_zIzeeT7lTCErY0131aEPuQ_Iu7-Iwjb',
 
   SCHOOL: {
     name: 'Bakarr School',
