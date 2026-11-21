@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Sign in | Bakarr School</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth">
+  <main class="stage">
+    <section class="brand-panel">
+      <span class="orb o1" aria-hidden="true"></span><span class="orb o2" aria-hidden="true"></span><span class="orb o3" aria-hidden="true"></span>
+      <canvas id="net" aria-hidden="true"></canvas>
+      <a class="brand" href="index.html"><span class="logo-slot" data-logo></span><span data-school>Bakarr School</span></a>
+      <div class="hero-copy">
+        <p class="eyebrow">School portal</p>
+        <h1>Every student, parent and teacher, <em>in one place.</em></h1>
+        <div class="slides" id="slides" aria-live="off">
+          <p class="on">Results the moment the school publishes them.</p>
+          <p>Attendance and fee alerts sent straight to parents.</p>
+          <p>Assignments, report cards and receipts behind one sign-in.</p>
+        </div>
+      </div>
+      <div>
+        <div class="metrics" id="metrics" hidden></div>
+        <p class="foot" style="margin-top:18px">&copy; <span id="yr"></span> <span data-school>Bakarr School</span></p>
+      </div>
+    </section>
+
+    <section class="form-panel">
+      <div class="card auth-card" id="card">
+        <div class="views">
+          <form class="pane active" id="login-form" novalidate>
+            <div><h2>Welcome back</h2></div>
+            <p class="sub-line" id="sub-line">Sign in to your student account.</p>
+            <div class="roles" id="roles" role="tablist" aria-label="I am a">
+              <button type="button" role="tab" aria-selected="true" data-role="student">Student</button>
+              <button type="button" role="tab" aria-selected="false" data-role="parent">Parent</button>
+              <button type="button" role="tab" aria-selected="false" data-role="teacher">Teacher</button>
+              <button type="button" role="tab" aria-selected="false" data-role="admin">Admin</button>
+            </div>
+            <div class="msg" id="msg" role="alert"></div>
+            <div>
+              <label class="lbl" for="email">Email address</label>
+              <div class="ctl"><span data-icon="mail"></span><input class="input" id="email" name="email" type="email" autocomplete="username" inputmode="email" placeholder="you@example.com" required></div>
+            </div>
+            <div>
+              <label class="lbl" for="password">Password</label>
+              <div class="ctl"><span data-icon="lock"></span><input class="input has-peek" id="password" name="password" type="password" autocomplete="current-password" placeholder="Your password" required>
+                <button class="icon-btn peek" type="button" id="peek" aria-label="Show password" data-icon="eye"></button></div>
+              <p class="caps" id="caps">Caps Lock is on.</p>
+            </div>
+            <div class="row"><span></span><button class="link" type="button" id="to-forgot">Forgot password?</button></div>
+            <button class="btn primary go block" id="go" type="submit">
+              <span class="lbl-txt">Sign in</span><span class="spin"></span>
+              <svg class="tick" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+            </button>
+          </form>
+
+          <form class="pane left" id="forgot-form" novalidate>
+            <div><h2>Reset your password</h2></div>
+            <p class="sub-line">Enter your email and we will send you a link to choose a new password.</p>
+            <div class="msg" id="fmsg" role="alert"></div>
+            <div>
+              <label class="lbl" for="femail">Email address</label>
+              <div class="ctl"><span data-icon="mail"></span><input class="input" id="femail" name="femail" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+            </div>
+            <button class="btn primary go block" id="fgo" type="submit"><span class="lbl-txt">Send reset link</span><span class="spin"></span></button>
+            <button class="link" type="button" id="to-login" style="justify-self:center">Back to sign in</button>
+          </form>
+        </div>
+      </div>
+      <div class="setup" id="setup" hidden></div>
+      <a class="back" href="index.html"><span data-icon="home"></span> Back to the school website</a>
+    </section>
+  </main>
+
+  <div class="curtain" id="curtain" aria-live="polite" aria-hidden="true">
+    <div class="curtain-in"><img src="assets/logo.svg" alt=""><p id="curtain-text">Signing you in...</p><div class="progress"><i></i></div></div>
+  </div>
+  <noscript><p style="padding:24px;text-align:center">Please enable JavaScript to sign in.</p></noscript>
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bakarr School</title>
+  <meta name="description" content="Bakarr School: admissions, academics, news, events and a secure portal for students, parents and teachers.">
+  <meta name="theme-color" content="#0e4d4a">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/site.css">
+  <script>document.documentElement.classList.add('js')</script>
+</head>
+<body class="site">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <div class="s-top"><div class="s-wrap">
+    <span data-ic="clock"></span><span id="t-hours"></span>
+    <span class="sp"></span>
+    <a id="t-phone" href="#contact"></a><a id="t-mail" href="#contact"></a>
+  </div></div>
+
+  <header class="s-head" id="head"><div class="s-wrap s-nav">
+    <a class="s-brand" href="#top"><span class="logo-slot" data-logo></span><span><b data-school>Bakarr School</b><small id="t-motto"></small></span></a>
+    <nav id="nav" aria-label="Main"><a href="#about">About</a><a href="#academics">Academics</a><a href="#admissions">Admissions</a><a href="#news">News</a><a href="#staff">Staff</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
+    <div class="s-cta"><a class="btn gold sm" href="login.html"><span data-ic="lock"></span> Portal sign in</a>
+      <button class="icon-btn s-burger" id="burger" aria-label="Menu" aria-expanded="false"></button></div>
+  </div></header>
+
+  <main id="main">
+    <section class="s-hero" id="top"><div class="s-wrap s-hero-grid">
+      <div class="s-hero-copy">
+        <p class="s-eyebrow">Admissions are open</p>
+        <h1>A school where every child is <em>known</em>, taught and trusted to grow.</h1>
+        <p class="s-lead">From nursery to senior secondary, we pair strong teaching with a secure online portal, so parents see attendance, results and fees as they happen.</p>
+        <div class="s-actions"><a class="btn gold" href="#apply">Apply for admission</a><a class="btn ghost-light" href="login.html">Student and parent portal</a></div>
+        <dl class="s-stats" id="stats" hidden></dl>
+      </div>
+      <div class="s-hero-art" aria-hidden="true">
+        <span class="arch a1"></span><span class="arch a2"></span><span class="arch a3"></span>
+        <div class="chip c1"><span data-ic="check"></span> Attendance alerts</div>
+        <div class="chip c2"><span data-ic="file"></span> Results online</div>
+        <div class="chip c3"><span data-ic="receipt"></span> Fee receipts</div>
+      </div>
+    </div></section>
+
+    <section class="s-sec" id="about"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">About us</p><h2>Education built on knowledge, character and service</h2><p>We work with families, not around them. Every learner has a teacher who knows their name, their progress and their next step.</p></header>
+      <div class="s-grid3">
+        <article class="s-card reveal"><span class="s-ico" data-ic="book"></span><h3>Our mission</h3><p>To give every learner a strong academic foundation and the confidence to use it well.</p></article>
+        <article class="s-card reveal"><span class="s-ico" data-ic="eye"></span><h3>Our vision</h3><p>A community of curious, disciplined and kind young people who lead where they live.</p></article>
+        <article class="s-card reveal"><span class="s-ico" data-ic="shield"></span><h3>Our values</h3><p>Respect, honesty, perseverance and service guide how we teach and how we treat each other.</p></article>
+      </div>
+    </div></section>
+
+    <section class="s-sec alt" id="academics"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Academics</p><h2>A clear path from first day to graduation</h2><p>Each level builds on the one before, with regular assessment and honest reporting to parents.</p></header>
+      <div class="s-levels" id="levels"></div>
+      <div class="s-feat">
+        <div class="reveal"><span class="s-ico" data-ic="calendar"></span><h4>Daily attendance</h4><p>Parents are notified in the app when a child is marked absent.</p></div>
+        <div class="reveal"><span class="s-ico" data-ic="file"></span><h4>Online report cards</h4><p>Results appear in the portal when the school publishes them.</p></div>
+        <div class="reveal"><span class="s-ico" data-ic="clipboard"></span><h4>Digital assignments</h4><p>Students receive and hand in homework from any device.</p></div>
+        <div class="reveal"><span class="s-ico" data-ic="wallet"></span><h4>Clear school fees</h4><p>See balances, payment history and printable receipts at any time.</p></div>
+      </div>
+    </div></section>
+
+    <section class="s-sec" id="admissions"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Admissions</p><h2>Apply online in about five minutes</h2><p>Submit the form below. Our admissions team reviews every application and contacts you using the details you provide.</p></header>
+      <ol class="s-steps reveal">
+        <li><b>Apply</b><span>Complete the online application form.</span></li>
+        <li><b>Review</b><span>The admissions team checks your application.</span></li>
+        <li><b>Decision</b><span>You are contacted with the outcome.</span></li>
+        <li><b>Enrol</b><span>Complete registration and receive portal access.</span></li>
+      </ol>
+      <div class="s-two" id="apply">
+        <div class="card s-form reveal" id="apply-card">
+          <h3>Application form</h3>
+          <div id="apply-form-host"></div>
+          <p style="margin-top:16px"><button class="btn primary" id="apply-go" type="button">Submit application</button></p>
+        </div>
+        <aside class="s-side reveal">
+          <div class="card"><h3>Track an application</h3><p class="muted" style="margin-bottom:12px">Enter the reference you received when you applied.</p>
+            <form id="track-form" class="s-inline" novalidate><input class="input" id="track-ref" placeholder="APP-XXXXXXXX" maxlength="12" aria-label="Application reference" autocomplete="off"><button class="btn ghost" type="submit">Check</button></form>
+            <div id="track-out" style="margin-top:14px"></div></div>
+          <div class="card"><h3>Questions?</h3><p class="muted">Call or email the admissions office and we will help you through the process.</p><p style="margin-top:10px"><a href="#contact" class="link">Contact the school</a></p></div>
+        </aside>
+      </div>
+    </div></section>
+
+    <section class="s-sec alt" id="news"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">News and events</p><h2>What is happening at school</h2></header>
+      <div class="s-two news">
+        <div><h3 class="s-h3">Latest news</h3><div id="news-list" class="s-news"></div></div>
+        <div><h3 class="s-h3">Upcoming events</h3><div id="events-list" class="s-events"></div></div>
+      </div>
+    </div></section>
+
+    <section class="s-sec" id="staff"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Our team</p><h2>Teachers who know their subject and their students</h2></header>
+      <div class="s-staff" id="staff-list"></div>
+    </div></section>
+
+    <section class="s-sec alt" id="gallery"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Gallery</p><h2>Life at school</h2></header>
+      <div class="s-gallery" id="gallery-list"></div>
+    </div></section>
+
+    <section class="s-sec" id="faq"><div class="s-wrap s-narrow">
+      <header class="s-title reveal"><p class="s-eyebrow dark">FAQ</p><h2>Common questions</h2></header>
+      <div class="s-faq reveal">
+        <details><summary>How do I apply?</summary><p>Use the application form on this page. You will receive a reference code that you can use to check the status of your application.</p></details>
+        <details><summary>How do parents see their child's results?</summary><p>Once the school creates your parent account, sign in to the portal. Results, attendance and fees for each child are listed there.</p></details>
+        <details><summary>When do I get my portal login?</summary><p>Accounts are created by the school after enrolment. You will be given a temporary password and can change it after signing in.</p></details>
+        <details><summary>Can I pay fees online?</summary><p>The portal shows balances and receipts. Payments are recorded by the school office; ask the office for the payment methods it accepts.</p></details>
+      </div>
+    </div></section>
+
+    <section class="s-sec alt" id="contact"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Contact</p><h2>Talk to us</h2></header>
+      <div class="s-two">
+        <div class="s-contact reveal">
+          <div><span class="s-ico" data-ic="pin"></span><div><b>Address</b><p id="c-addr"></p></div></div>
+          <div><span class="s-ico" data-ic="clock"></span><div><b>Office hours</b><p id="c-hours"></p></div></div>
+          <div><span class="s-ico" data-ic="send"></span><div><b>Phone</b><p id="c-phone"></p></div></div>
+          <div><span class="s-ico" data-ic="mail"></span><div><b>Email</b><p id="c-mail"></p></div></div>
+        </div>
+        <div class="card reveal"><h3>Send us a message</h3><div id="contact-host"></div><p style="margin-top:14px"><button class="btn primary" id="contact-go" type="button">Send message</button></p></div>
+      </div>
+    </div></section>
+  </main>
+
+  <footer class="s-foot"><div class="s-wrap">
+    <div class="s-foot-row"><a class="s-brand light" href="#top"><span class="logo-slot" data-logo></span><span><b data-school>Bakarr School</b><small id="f-motto"></small></span></a>
+      <nav aria-label="Footer"><a href="#about">About</a><a href="#admissions">Admissions</a><a href="#news">News</a><a href="#contact">Contact</a><a href="login.html">Portal sign in</a></nav></div>
+    <p class="s-copy">&copy; <span id="yr"></span> <span data-school>Bakarr School</span>. All rights reserved.</p>
+  </div></footer>
+
+  <noscript><p style="padding:16px;text-align:center">Some parts of this site need JavaScript.</p></noscript>
+  <script type="module" src="js/site.js"></script>
+</body>
+</html>
