@@ -14,7 +14,7 @@ export const CONFIG = {
     motto: 'Knowledge, character and service',
     email: 'info@bakarrschool.edu',
     phone: '+000 000 000 000',
-    address: 'Add your school address in js/config.js',
+    address: 'New york ',
     hours: 'Monday to Friday, 7:30 am to 4:00 pm',
   },
 
