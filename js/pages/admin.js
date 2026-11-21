@@ -4,7 +4,6 @@ import { profileView, announcementsView } from './shared.js';
 import * as core from './admin-core.js';
 import * as ops from './admin-ops.js';
 import * as sys from './admin-system.js';
-import * as extra from './admin-extras.js';
 import { adminTimetable } from './timetable.js';
 import { messagesView } from './messages.js';
 import { settingsView } from './settings.js';
@@ -25,10 +24,6 @@ startPortal({
     { id: 'exams', label: 'Examinations', icon: 'file', render: (v, c) => ops.exams()(v, c) },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: (v, c) => ops.scores()(v, c) },
     { id: 'fees', label: 'School fees', icon: 'wallet', group: 'Finance', perm: 'fees', render: (v, c) => ops.fees()(v, c) },
-    { id: 'scan', label: 'Scan attendance', icon: 'calendar', group: 'School life', render: (v, c) => extra.scanAttendance()(v, c) },
-    { id: 'cards', label: 'Student cards', icon: 'student', render: (v, c) => extra.studentCards()(v, c) },
-    { id: 'alumni', label: 'Alumni', icon: 'users', render: (v, c) => extra.alumni()(v, c) },
-    { id: 'achievements', label: 'Achievements', icon: 'chart', render: (v, c) => extra.achievements()(v, c) },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', group: 'Communication', render: (v, c) => ops.announcements()(v, c) },
     { id: 'admissions', label: 'Admissions', icon: 'inbox', perm: 'admissions', render: (v, c) => ops.admissions(c)(v, c) },
     { id: 'inbox', label: 'Messages', icon: 'message', render: messagesView },
