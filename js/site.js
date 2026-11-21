@@ -38,7 +38,7 @@ function reveal() {
 }
 reveal();
 
-const sections = ['about', 'academics', 'admissions', 'news', 'staff', 'gallery', 'contact'];
+const sections = ['about', 'academics', 'admissions', 'news', 'staff', 'gallery', 'achievements', 'alumni', 'contact'];
 if ('IntersectionObserver' in window) {
   const links = Object.fromEntries($$('#nav a').map((a) => [a.getAttribute('href').slice(1), a]));
   const so = new IntersectionObserver((es) => es.forEach((x) => { if (x.isIntersecting) { $$('#nav a').forEach((a) => a.classList.remove('on')); links[x.target.id]?.classList.add('on'); } }), { rootMargin: '-45% 0px -50% 0px' });
@@ -115,7 +115,15 @@ $('#apply-go').onclick = async (e) => {
   setBusy(e.currentTarget, true, 'Submitting');
   try {
     const reference = refCode();
-    const { error } = await sb.from('admission_applications').insert({ ...values, reference });
+    const documents = [];
+    for (const f of [...($('#adm-files')?.files || [])].slice(0, 6)) {
+      if (f.size > 5 * 1024 * 1024) throw new Error(`${f.name} is bigger than 5 MB`);
+      const path = `${reference}/${Date.now()}-${f.name.replace(/[^\w.\-]/g, '_')}`;
+      const up = await sb.storage.from('admission-docs').upload(path, f, { contentType: f.type });
+      if (up.error) throw up.error;
+      documents.push(path);
+    }
+    const { error } = await sb.from('admission_applications').insert({ ...values, reference, documents });
     if (error) throw error;
     sb.functions.invoke('application-received', { body: { reference } }).then(() => {}, () => {}); // confirmation email (optional)
     $('#apply-card').innerHTML = `<div class="s-success"><span class="badge ok">Application received</span><h3>Thank you, ${esc(values.parent_name.split(' ')[0])}</h3><p>Your reference code is</p><div class="ref" id="ref">${reference}</div>
