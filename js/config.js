@@ -10,7 +10,7 @@ export const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_zIzeeT7lTCErY0131aEPuQ_Iu7-Iwjb',
 
   SCHOOL: {
-    name: 'Bakarr School',
+    name: 'Alfrian Int'l Academy & Sec. School',
     motto: 'Knowledge, character and service',
     email: 'info@bakarrschool.edu',
     phone: '+000 000 000 000',
