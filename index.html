@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Bakarr School</title>
-  <meta name="description" content="Bakarr School: admissions, academics, news, events and a secure portal for students, parents and teachers.">
-  <meta name="theme-color" content="#0e4d4a">
-  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <title>Alfrian Int'l Academy &amp; Sec. Sch.</title>
+  <meta name="description" content="Alfrian Int'l Academy &amp; Sec. Sch.: admissions, academics, news, events and a secure portal for students, parents and teachers.">
+  <meta name="theme-color" content="#14307f">
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,8 +25,8 @@
   </div></div>
 
   <header class="s-head" id="head"><div class="s-wrap s-nav">
-    <a class="s-brand" href="#top"><span class="logo-slot" data-logo></span><span><b data-school>Bakarr School</b><small id="t-motto"></small></span></a>
-    <nav id="nav" aria-label="Main"><a href="#about">About</a><a href="#academics">Academics</a><a href="#admissions">Admissions</a><a href="#news">News</a><a href="#staff">Staff</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
+    <a class="s-brand" href="#top"><span class="logo-slot" data-logo></span><span><b data-school>Alfrian Int'l Academy &amp; Sec. Sch.</b><small id="t-motto"></small></span></a>
+    <nav id="nav" aria-label="Main"><a href="#about">About</a><a href="#academics">Academics</a><a href="#admissions">Admissions</a><a href="#news">News</a><a href="#staff">Staff</a><a href="#gallery">Gallery</a><a href="#achievements">Achievements</a><a href="#alumni">Alumni</a><a href="#contact">Contact</a></nav>
     <div class="s-cta"><a class="btn gold sm" href="login.html"><span data-ic="lock"></span> Portal sign in</a>
       <button class="icon-btn s-burger" id="burger" aria-label="Menu" aria-expanded="false"></button></div>
   </div></header>
@@ -79,6 +80,9 @@
         <div class="card s-form reveal" id="apply-card">
           <h3>Application form</h3>
           <div id="apply-form-host"></div>
+          <div style="margin-top:14px"><label for="adm-files" style="display:block;font-weight:600;margin-bottom:6px">Documents (birth certificate, past results)</label>
+            <input id="adm-files" type="file" multiple accept=".pdf,.jpg,.jpeg,.png">
+            <p class="muted" style="font-size:13px;margin-top:6px">PDF, JPG or PNG. Up to 6 files, 5 MB each. Optional.</p></div>
           <p style="margin-top:16px"><button class="btn primary" id="apply-go" type="button">Submit application</button></p>
         </div>
         <aside class="s-side reveal">
@@ -108,6 +112,20 @@
       <div class="s-gallery" id="gallery-list"></div>
     </div></section>
 
+    <section class="s-sec" id="achievements"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Achievements</p><h2>Prizes, results and awards</h2><p>The proud moments of our students and school.</p></header>
+      <div class="s-grid3" id="ach-list"></div>
+    </div></section>
+
+    <section class="s-sec alt" id="alumni"><div class="s-wrap">
+      <header class="s-title reveal"><p class="s-eyebrow dark">Alumni</p><h2>Former students, still part of the family</h2><p>Did you study here? Add your name and tell us what you do now.</p></header>
+      <div class="s-two">
+        <div class="s-grid3" id="alumni-list" style="grid-template-columns:1fr"></div>
+        <div class="card reveal"><h3>Join the alumni</h3><div id="alumni-form-host"></div>
+          <p style="margin-top:14px"><button class="btn primary" id="alumni-go" type="button">Send</button></p></div>
+      </div>
+    </div></section>
+
     <section class="s-sec" id="faq"><div class="s-wrap s-narrow">
       <header class="s-title reveal"><p class="s-eyebrow dark">FAQ</p><h2>Common questions</h2></header>
       <div class="s-faq reveal">
@@ -133,12 +151,13 @@
   </main>
 
   <footer class="s-foot"><div class="s-wrap">
-    <div class="s-foot-row"><a class="s-brand light" href="#top"><span class="logo-slot" data-logo></span><span><b data-school>Bakarr School</b><small id="f-motto"></small></span></a>
+    <div class="s-foot-row"><a class="s-brand light" href="#top"><span class="logo-slot" data-logo></span><span><b data-school>Alfrian Int'l Academy &amp; Sec. Sch.</b><small id="f-motto"></small></span></a>
       <nav aria-label="Footer"><a href="#about">About</a><a href="#admissions">Admissions</a><a href="#news">News</a><a href="#contact">Contact</a><a href="login.html">Portal sign in</a></nav></div>
-    <p class="s-copy">&copy; <span id="yr"></span> <span data-school>Bakarr School</span>. All rights reserved.</p>
+    <p class="s-copy">&copy; <span id="yr"></span> <span data-school>Alfrian Int'l Academy &amp; Sec. Sch.</span>. All rights reserved.</p>
   </div></footer>
 
   <noscript><p style="padding:16px;text-align:center">Some parts of this site need JavaScript.</p></noscript>
   <script type="module" src="js/site.js"></script>
+  <script type="module" src="js/extras.js"></script>
 </body>
 </html>
