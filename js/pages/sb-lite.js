@@ -59,7 +59,7 @@ export const badge = (text, kind) => {
 };
 
 // ---- Payslip PDF (loads jsPDF on demand if the page doesn't already have it) ----
-function loadScript(src) {
+export function loadScript(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
     s.src = src; s.onload = resolve; s.onerror = () => reject(new Error('Could not load ' + src));
@@ -67,7 +67,7 @@ function loadScript(src) {
   });
 }
 
-async function ensurePdf() {
+export async function ensurePdf() {
   if (!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
   const probe = new window.jspdf.jsPDF();
   if (typeof probe.autoTable !== 'function') {
