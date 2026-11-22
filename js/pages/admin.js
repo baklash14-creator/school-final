@@ -9,15 +9,12 @@ import { messagesView } from './messages.js';
 import { settingsView } from './settings.js';
 import { alumni } from './admin-alumni.js';
 import { payroll, staffLeave } from './admin-payroll.js';
-import { analytics } from './admin-analytics.js';
-import { reportCards } from './admin-reportcards.js';
 
 startPortal({
   roles: ['super_admin', 'school_admin'],
   home: 'overview',
   nav: [
     { id: 'overview', label: 'Overview', icon: 'grid', render: core.overview },
-    { id: 'analytics', label: 'Analytics', icon: 'chart', render: (v, c) => analytics()(v, c) },
     { id: 'students', label: 'Students', icon: 'student', group: 'People', render: (v, c) => core.students(c)(v, c) },
     { id: 'teachers', label: 'Teachers', icon: 'teacher', render: (v, c) => core.teachers(c)(v, c) },
     { id: 'parents', label: 'Parents', icon: 'users', render: (v, c) => core.parents(c)(v, c) },
@@ -29,7 +26,6 @@ startPortal({
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: (v, c) => ops.attendance()(v, c) },
     { id: 'exams', label: 'Examinations', icon: 'file', render: (v, c) => ops.exams()(v, c) },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: (v, c) => ops.scores()(v, c) },
-    { id: 'report-cards', label: 'Report cards', icon: 'file', render: (v, c) => reportCards()(v, c) },
     { id: 'fees', label: 'School fees', icon: 'wallet', group: 'Finance', perm: 'fees', render: (v, c) => ops.fees()(v, c) },
     { id: 'payroll', label: 'Staff payroll', icon: 'wallet', perm: 'payroll', render: (v, c) => payroll()(v, c) },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', group: 'Communication', render: (v, c) => ops.announcements()(v, c) },
