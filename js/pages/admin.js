@@ -7,6 +7,8 @@ import * as sys from './admin-system.js';
 import { adminTimetable } from './timetable.js';
 import { messagesView } from './messages.js';
 import { settingsView } from './settings.js';
+import { alumni } from './admin-alumni.js';
+import { payroll, staffLeave } from './admin-payroll.js';
 
 startPortal({
   roles: ['super_admin', 'school_admin'],
@@ -16,6 +18,7 @@ startPortal({
     { id: 'students', label: 'Students', icon: 'student', group: 'People', render: (v, c) => core.students(c)(v, c) },
     { id: 'teachers', label: 'Teachers', icon: 'teacher', render: (v, c) => core.teachers(c)(v, c) },
     { id: 'parents', label: 'Parents', icon: 'users', render: (v, c) => core.parents(c)(v, c) },
+    { id: 'staff-leave', label: 'Staff leave', icon: 'calendar', render: (v, c) => staffLeave()(v, c) },
     { id: 'classes', label: 'Classes', icon: 'class', group: 'Academics', render: (v, c) => core.classes()(v, c) },
     { id: 'subjects', label: 'Subjects', icon: 'book', render: (v, c) => core.subjects()(v, c) },
     { id: 'class-subjects', label: 'Class subjects', icon: 'clipboard', render: (v, c) => core.classSubjects()(v, c) },
@@ -24,8 +27,10 @@ startPortal({
     { id: 'exams', label: 'Examinations', icon: 'file', render: (v, c) => ops.exams()(v, c) },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: (v, c) => ops.scores()(v, c) },
     { id: 'fees', label: 'School fees', icon: 'wallet', group: 'Finance', perm: 'fees', render: (v, c) => ops.fees()(v, c) },
+    { id: 'payroll', label: 'Staff payroll', icon: 'wallet', perm: 'payroll', render: (v, c) => payroll()(v, c) },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', group: 'Communication', render: (v, c) => ops.announcements()(v, c) },
     { id: 'admissions', label: 'Admissions', icon: 'inbox', perm: 'admissions', render: (v, c) => ops.admissions(c)(v, c) },
+    { id: 'alumni', label: 'Alumni', icon: 'users', render: (v, c) => alumni()(v, c) },
     { id: 'inbox', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'messages', label: 'Website messages', icon: 'mail', render: (v, c) => sys.messages()(v, c) },
     { id: 'gallery', label: 'Photo gallery', icon: 'image', render: (v, c) => sys.gallery()(v, c) },
