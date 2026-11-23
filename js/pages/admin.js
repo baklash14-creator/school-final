@@ -7,6 +7,11 @@ import * as sys from './admin-system.js';
 import { adminTimetable } from './timetable.js';
 import { messagesView } from './messages.js';
 import { settingsView } from './settings.js';
+import { quizManager } from './quizzes.js';
+import { adminLibrary } from './library.js';
+import { adminLeave, adminPayroll } from './staff.js';
+import { conductManager, healthDirectory, sickbayManager } from './wellbeing.js';
+import { lookup } from '../api.js';
 
 startPortal({
   roles: ['super_admin', 'school_admin'],
@@ -16,6 +21,10 @@ startPortal({
     { id: 'students', label: 'Students', icon: 'student', group: 'People', render: (v, c) => core.students(c)(v, c) },
     { id: 'teachers', label: 'Teachers', icon: 'teacher', render: (v, c) => core.teachers(c)(v, c) },
     { id: 'parents', label: 'Parents', icon: 'users', render: (v, c) => core.parents(c)(v, c) },
+    { id: 'leave', label: 'Staff leave', icon: 'calendar', render: (v, c) => adminLeave()(v, c) },
+    { id: 'conduct', label: 'Conduct', icon: 'alert', render: (v, c) => conductManager()(v, c) },
+    { id: 'health', label: 'Health profiles', icon: 'shield', render: (v) => healthDirectory(v, { canEdit: true }) },
+    { id: 'sickbay', label: 'Sickbay', icon: 'clipboard', render: (v, c) => sickbayManager()(v, c) },
     { id: 'classes', label: 'Classes', icon: 'class', group: 'Academics', render: (v, c) => core.classes()(v, c) },
     { id: 'subjects', label: 'Subjects', icon: 'book', render: (v, c) => core.subjects()(v, c) },
     { id: 'class-subjects', label: 'Class subjects', icon: 'clipboard', render: (v, c) => core.classSubjects()(v, c) },
@@ -23,7 +32,10 @@ startPortal({
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: (v, c) => ops.attendance()(v, c) },
     { id: 'exams', label: 'Examinations', icon: 'file', render: (v, c) => ops.exams()(v, c) },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: (v, c) => ops.scores()(v, c) },
+    { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: (v, c) => quizManager({ classOptions: lookup('classes', 'name'), subjectOptions: lookup('subjects', 'name') })(v, c) },
+    { id: 'library', label: 'Library', icon: 'book', render: (v, c) => adminLibrary()(v, c) },
     { id: 'fees', label: 'School fees', icon: 'wallet', group: 'Finance', perm: 'fees', render: (v, c) => ops.fees()(v, c) },
+    { id: 'payroll', label: 'Staff payroll', icon: 'receipt', perm: 'payroll', render: (v, c) => adminPayroll()(v, c) },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', group: 'Communication', render: (v, c) => ops.announcements()(v, c) },
     { id: 'admissions', label: 'Admissions', icon: 'inbox', perm: 'admissions', render: (v, c) => ops.admissions(c)(v, c) },
     { id: 'inbox', label: 'Messages', icon: 'message', render: messagesView },

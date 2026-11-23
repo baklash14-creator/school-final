@@ -4,6 +4,9 @@ import { startPortal } from '../portal-shell.js';
 import { must } from '../api.js';
 import { messagesView } from './messages.js';
 import { classTimetableView } from './timetable.js';
+import { studentQuizzes } from './quizzes.js';
+import { libraryView } from './library.js';
+import { conductView, healthProfileView } from './wellbeing.js';
 import { attendanceView, resultsView, feesView, announcementsView, profileView, childHeader } from './shared.js';
 import { $, $$, esc, icon, toast, fail, modal, setBusy, badge, emptyState, loadingBlock, errorBlock, fmtDate, fmtDateTime, fmtMoney, today, num } from '../ui.js';
 
@@ -93,6 +96,10 @@ startPortal({
     { id: 'timetable', label: 'Timetable', icon: 'table', render: wrap((v, c, s) => classTimetableView(v, s.class_id)) },
     { id: 'attendance', label: 'My attendance', icon: 'calendar', render: wrap((v, c, s) => attendanceView(v, s.id)) },
     { id: 'assignments', label: 'Assignments', icon: 'clipboard', render: assignments },
+    { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: wrap((v, c, s) => studentQuizzes(v, c, s)) },
+    { id: 'library', label: 'Library', icon: 'book', render: wrap((v, c, s) => libraryView(v, { studentId: s.id })) },
+    { id: 'conduct', label: 'Conduct', icon: 'alert', render: wrap((v, c, s) => conductView(v, s.id)) },
+    { id: 'health', label: 'Health', icon: 'shield', render: wrap((v, c, s) => healthProfileView(v, s.id, s.full_name)) },
     { id: 'fees', label: 'School fees', icon: 'wallet', render: wrap((v, c, s) => feesView(v, s.id, c)) },
     { id: 'messages', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: announcementsView },

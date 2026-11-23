@@ -57,4 +57,7 @@ function startIdleTimer() {
   reset();
 }
 
-export const hasPerm = (profile, key) => profile.role === 'super_admin' || (profile.role === 'school_admin' && profile.permissions?.[key] !== false);
+// Most modules are allowed for a school administrator unless switched off. Sensitive ones must be switched on (same rule as the database).
+const STRICT_PERMS = new Set(['payroll']);
+export const hasPerm = (profile, key) => profile.role === 'super_admin'
+  || (profile.role === 'school_admin' && (STRICT_PERMS.has(key) ? profile.permissions?.[key] === true : profile.permissions?.[key] !== false));

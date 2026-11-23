@@ -5,6 +5,10 @@ import { must, lookup, nameMap } from '../api.js';
 import { crudPage } from '../crud.js';
 import { messagesView } from './messages.js';
 import { teacherTimetableView } from './timetable.js';
+import { quizManager } from './quizzes.js';
+import { libraryView } from './library.js';
+import { teacherLeave, teacherPayslips } from './staff.js';
+import { conductManager, healthDirectory } from './wellbeing.js';
 import { attendanceTaker, scoreEntry, announcementsView, profileView } from './shared.js';
 import {
   $, $$, esc, icon, toast, fail, modal, setBusy, badge, tableHtml, emptyState, loadingBlock, errorBlock, fmtDate, fmtDateTime, today, num,
@@ -128,6 +132,12 @@ startPortal({
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: attendance },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: scores },
     { id: 'assignments', label: 'Assignments', icon: 'clipboard', render: assignmentsPage },
+    { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); const my = await myClasses(t); return quizManager({ teacher: t, classOptions: my.classes, subjectOptions: lookup('subjects', 'name') })(v, c); } },
+    { id: 'conduct', label: 'Conduct', icon: 'alert', render: (v, c) => conductManager({ teacher: true })(v, c) },
+    { id: 'health', label: 'Student health', icon: 'shield', render: (v) => healthDirectory(v) },
+    { id: 'library', label: 'Library', icon: 'book', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return libraryView(v, { teacherId: t.id }); } },
+    { id: 'leave', label: 'My leave', icon: 'calendar', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return teacherLeave(v, t); } },
+    { id: 'payslips', label: 'My payslips', icon: 'receipt', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return teacherPayslips(v, t); } },
     { id: 'messages', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: announcementsView },
     { id: 'profile', label: 'My profile', icon: 'user', render: profileView },

@@ -9,7 +9,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 | Public website | `index.html`, `css/site.css`, `js/site.js` |
 | Animated sign-in + password reset | `login.html`, `reset.html`, `css/auth.css`, `js/login.js` |
 | Portals | `admin.html`, `teacher.html`, `student.html`, `parent.html`, `js/pages/*.js`, `css/app.css` |
-| Database, security, storage | `supabase/schema.sql` (fresh install), `supabase/upgrade-v2.sql` (only if you already ran the first version) |
+| Database, security, storage | `supabase/schema.sql` (fresh install), `supabase/upgrade-v2.sql` (only if you already ran the first version), `supabase/upgrade-v3.sql` (only if you installed before version 3) |
 | Server functions | `supabase/functions/admin-users`, `notify-external` (email/SMS), `payment-webhook` (automatic online payments) |
 | Settings | `js/config.js` |
 | Hosting headers | `vercel.json` |
@@ -21,7 +21,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 ## 1. Create the Supabase project
 
 1. Go to supabase.com, create a project, and wait for it to finish starting.
-2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes version 2; if you ran an older copy earlier, run `supabase/upgrade-v2.sql` instead), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
+2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes versions 2 and 3; if you ran an older copy earlier, run `supabase/upgrade-v2.sql` and then `supabase/upgrade-v3.sql` instead; both can be run again safely), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
 3. **Authentication > Sign In / Providers > Email**: turn **off** "Allow new users to sign up". Accounts are created by administrators only. Email confirmation can stay on or off; accounts made by the admin are pre-confirmed.
 4. **Authentication > URL Configuration**: set **Site URL** to your live address (for example `https://bakarr-school.vercel.app`) and add `https://YOUR-DOMAIN/reset.html` to **Redirect URLs**. Password-reset emails need this.
 
@@ -87,6 +87,12 @@ Sign in at `/login.html` as the Super Administrator, then:
 6. Give people logins: click the key icon on a student, teacher or parent row, or use **User accounts > Create account**. Share the temporary password.
 7. Add a few **Announcements** with "Show on public website" ticked, and photos under **Photo gallery**.
 
+**Added in version 3:**
+- **Online quizzes** (`js/pages/quizzes.js`): teachers and admins build multiple-choice quizzes, set a time limit and an open window, and publish. Students take them in the portal with a countdown; marking is done by the database and the answer key is never sent to the browser while a quiz is open. Questions lock once anyone has attempted the quiz. Parents see quiz results.
+- **Library** (`js/pages/library.js`): book catalogue, lending to students or teachers, returns with optional fines, copies-available tracking, and overdue reminders (students, parents and teachers are notified, once a day). Students and teachers can browse the shelf; parents see their child's loans.
+- **Staff leave and payroll** (`js/pages/staff.js`): teachers request leave (Monday to Friday count) and admins approve or reject with a note. Salaries, payslips, mark-as-paid and printable payslips are in **Staff payroll**; teachers see only their own paid payslips. **Payroll is off by default for School Administrators:** the Super Administrator turns on **Staff payroll** for a person in **User accounts > shield icon**. The database enforces this too.
+- **Conduct, health and sickbay** (`js/pages/wellbeing.js`): teachers and admins record incidents and commendations (teachers only for students they teach; each can be hidden from parents). Parents keep their child's health profile up to date (allergies, conditions, emergency contacts); class teachers can read it. The office logs sickbay visits and the parents are notified.
+
 ## Roles and security
 
 | Role | Can do |
@@ -94,8 +100,8 @@ Sign in at `/login.html` as the Super Administrator, then:
 | Super Administrator | Everything, including other administrators, deleting payments, audit log |
 | School Administrator | Everything except managing admin accounts; modules (fees, admissions, users, audit) can be switched off per person in **User accounts > shield icon** |
 | Teacher | Own classes and students, attendance, scores for their own subjects (until published), assignments and grading |
-| Student | Own results (once published), attendance, assignments, fees and receipts |
-| Parent | The same for each linked child |
+| Student | Own results (once published), attendance, assignments, fees and receipts, quizzes, library loans, shared conduct notes |
+| Parent | The same for each linked child, plus the child's health profile (editable) |
 
 - **Row Level Security is on for every table.** The browser only ever holds the anon key; what a user can read or change is decided by the database. One function, `can_access_student()`, guards private academic records: only the student, their parent, a teacher of their class, or an admin.
 - Roles come from `app_metadata` (settable only by the service role), so users cannot give themselves a role. A trigger blocks changes to role, status and permissions by non-admins.
@@ -128,6 +134,11 @@ This code was syntax-checked and run in a browser against a mock of Supabase (ev
 10. Send a message from the parent to a teacher of the child's class and reply.
 11. As a parent choose **School fees > Report a payment**; as admin approve it under Payment claims and confirm a receipt appears.
 12. With email/SMS keys set, use **Email, SMS, payments > Send test message**.
+13. Version 3: as a teacher build a quiz with two questions and publish it; as the student take it and see the score; check the student cannot take it twice.
+14. Lend a library book to a student; confirm the shelf count drops, then return it.
+15. As a School Administrator without the payroll permission confirm there is no **Staff payroll** menu; as Super Administrator tick it, create salaries, create payslips, mark paid, and confirm the teacher sees the payslip.
+16. As a teacher request leave; approve it as admin and check the notification.
+17. As a teacher record an incident for a student you teach (try one you do not teach; it must be refused); as the parent fill in the health profile and view the shared conduct note.
 
 **Not run against live services:** the new features were tested in a browser against a mock of Supabase. Email, SMS and payment providers need your own accounts, so those paths, and storage uploads, have not been exercised end to end.
 

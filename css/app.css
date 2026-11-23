@@ -278,3 +278,8 @@ pre.json { background: #0f1f1e; color: #cfe8e4; padding: 14px; border-radius: 10
 @media (max-width: 760px) {
   .msg-layout { grid-template-columns: 1fr; } .msg-thread { display: none; } .msg-layout.show-thread .msg-thread { display: flex; } .msg-layout.show-thread .msg-list { display: none; } .mt-back { display: inline-flex; }
 }
+
+/* v3: key/value list (health profile) */
+.kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 24px; margin: 0; }
+.kv dt { font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
+.kv dd { margin: 0; overflow-wrap: anywhere; }

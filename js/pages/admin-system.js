@@ -70,7 +70,7 @@ export function openCreateAccount(ctx, preset = {}, onDone = () => {}) {
 }
 
 /* ---------------- users ---------------- */
-const PERMS = [['fees', 'Fees and payments'], ['admissions', 'Admissions'], ['users', 'User accounts'], ['audit', 'Audit logs']];
+const PERMS = [['fees', 'Fees and payments'], ['admissions', 'Admissions'], ['users', 'User accounts'], ['audit', 'Audit logs'], ['payroll', 'Staff payroll (salaries and payslips)']];
 export function users() {
   return async (view, ctx) => {
     const page = crudPage({
@@ -115,7 +115,7 @@ export function users() {
             title: `Role and permissions`, size: 'sm',
             html: `<p class="muted" style="margin-bottom:12px"><b>${esc(row.full_name)}</b> (${esc(row.email || '')})</p>
               ${formHtml([{ name: 'role', label: 'Role', type: 'select', options: grantable(ctx).concat(row.role === 'super_admin' && !grantable(ctx).some((o) => o.value === 'super_admin') ? [{ value: 'super_admin', label: 'Super Administrator' }] : []), disabled: !canRole, full: true }], { role: row.role })}
-              ${row.role === 'school_admin' ? `<div class="field full" style="margin-top:14px"><label>Modules this administrator can use</label>${PERMS.map(([k, l]) => `<label class="check"><input type="checkbox" data-perm="${k}" ${perms[k] === false ? '' : 'checked'}><span>${l}</span></label>`).join('')}<small class="help">Super administrators always have full access.</small></div>` : ''}`,
+              ${row.role === 'school_admin' ? `<div class="field full" style="margin-top:14px"><label>Modules this administrator can use</label>${PERMS.map(([k, l]) => `<label class="check"><input type="checkbox" data-perm="${k}" ${(k === 'payroll' ? perms[k] === true : perms[k] !== false) ? 'checked' : ''}><span>${l}</span></label>`).join('')}<small class="help">Super administrators always have full access.</small></div>` : ''}`,
             footer: `<button class="btn ghost" data-close>Cancel</button><button class="btn primary" id="rl">Save</button>`,
           });
           $('#rl', m.el).onclick = async (e) => {
