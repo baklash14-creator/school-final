@@ -4,6 +4,9 @@ import { startPortal } from '../portal-shell.js';
 import { must } from '../api.js';
 import { messagesView } from './messages.js';
 import { classTimetableView } from './timetable.js';
+import { quizResultsView } from './quizzes.js';
+import { libraryView } from './library.js';
+import { conductView, healthProfileView } from './wellbeing.js';
 import { attendanceView, resultsView, feesView, announcementsView, profileView, childHeader } from './shared.js';
 import { $, esc, icon, badge, emptyState, fmtDate, fmtMoney } from '../ui.js';
 
@@ -66,6 +69,10 @@ startPortal({
     { id: 'results', label: 'Results', icon: 'file', render: forChild((v, c, k) => resultsView(v, k.id)) },
     { id: 'timetable', label: 'Timetable', icon: 'table', render: forChild((v, c, k) => classTimetableView(v, k.class_id)) },
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: forChild((v, c, k) => attendanceView(v, k.id)) },
+    { id: 'quizzes', label: 'Quiz results', icon: 'list', render: forChild((v, c, k) => quizResultsView(v, k.id)) },
+    { id: 'library', label: 'Library', icon: 'book', render: forChild((v, c, k) => libraryView(v, { studentId: k.id, browse: false })) },
+    { id: 'conduct', label: 'Conduct', icon: 'alert', render: forChild((v, c, k) => conductView(v, k.id)) },
+    { id: 'health', label: 'Health', icon: 'shield', render: forChild((v, c, k) => healthProfileView(v, k.id, k.full_name, { canEdit: true })) },
     { id: 'fees', label: 'School fees', icon: 'wallet', render: forChild((v, c, k) => feesView(v, k.id, c)) },
     { id: 'messages', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: announcementsView },
