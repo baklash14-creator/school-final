@@ -140,7 +140,7 @@ export function users() {
 }
 
 /* ---------------- audit log ---------------- */
-export function audit() {
+function changeLog() {
   return crudPage({
     table: 'audit_logs', title: 'Audit logs', singular: 'log', plural: 'audit entries', description: 'Every important change is recorded by the database and cannot be edited.',
     order: { col: 'created_at', asc: false }, pageSize: 25, search: ['user_name', 'entity'], searchPlaceholder: 'Search user or record type',
@@ -156,6 +156,43 @@ export function audit() {
     exportMap: (r) => ({ When: r.created_at, User: r.user_name || 'System', Action: r.action, Record: r.entity, 'Record id': r.entity_id || '' }),
     onAction: (act, row) => { if (act === 'view') modal({ title: 'Audit details', size: 'lg', html: `<pre class="json">${esc(JSON.stringify(row.details, null, 2) || 'No details')}</pre>` }); },
   });
+}
+
+/* Sign-in history: who signed in (or failed to), from which device, place and network */
+const ROLE_NAMES = { super_admin: 'admin', school_admin: 'admin', teacher: 'teacher', student: 'pupil', parent: 'parent', unauthenticated: 'unauthenticated' };
+function loginActivity() {
+  return crudPage({
+    table: 'login_events', title: 'Login activity', singular: 'sign-in', plural: 'sign-ins', description: 'Every successful and failed sign-in, with the device, place and network it came from. Entries cannot be edited or deleted.',
+    order: { col: 'created_at', asc: false }, pageSize: 25, search: ['display_name', 'identifier', 'ip', 'city', 'isp'], searchPlaceholder: 'Search name, ID, IP address or place',
+    canCreate: false, canEdit: false, canDelete: false, exportName: 'Login activity',
+    filters: [
+      { name: 'success', label: 'All results', options: [{ value: 'true', label: 'Successful' }, { value: 'false', label: 'Failed' }] },
+      { name: 'role', label: 'All roles', options: [['super_admin', 'Super admin'], ['school_admin', 'School admin'], ['teacher', 'Teacher'], ['student', 'Pupil'], ['parent', 'Parent'], ['unauthenticated', 'Not signed in']].map(([value, label]) => ({ value, label })) },
+    ],
+    columns: [
+      { label: 'Result', render: (r) => badge(r.success ? 'Success' : 'Failed', r.success ? 'ok' : 'bad') },
+      { label: 'User', render: (r) => `<b>${esc(r.display_name || '-')}</b><span class="sub">ID: ${esc(r.identifier || '-')} &bull; ${esc(ROLE_NAMES[r.role] || r.role)}</span>` },
+      { label: 'Device', render: (r) => esc(r.device || 'Unknown') },
+      { label: 'Location', render: (r) => { const where = [r.city, r.region].filter(Boolean).join(', '); return where || r.country ? `${esc(where || 'Unknown')}<span class="sub">${esc(r.country || '')}</span>` : 'Unknown'; } },
+      { label: 'Network', render: (r) => `${esc(r.ip || 'Unavailable')}<span class="sub">${esc(r.isp || 'Unknown')}</span>` },
+      { label: 'When', render: (r) => fmtDateTime(r.created_at) },
+    ],
+    exportMap: (r) => ({ Result: r.success ? 'Success' : 'Failed', Name: r.display_name || '', ID: r.identifier || '', Role: ROLE_NAMES[r.role] || r.role, Device: r.device || '', City: r.city || '', Region: r.region || '', Country: r.country || '', IP: r.ip || '', Network: r.isp || '', When: r.created_at }),
+  });
+}
+
+export function audit() {
+  return async (view, ctx) => {
+    view.innerHTML = '<div class="tabs" id="au-tabs"><button class="tab active" data-t="login">Login activity</button><button class="tab" data-t="changes">Change log</button></div><div id="au-pane"></div>';
+    const pane = view.querySelector('#au-pane');
+    const show = async (t) => {
+      view.querySelectorAll('#au-tabs .tab').forEach((b) => b.classList.toggle('active', b.dataset.t === t));
+      pane.innerHTML = '';
+      await (t === 'login' ? loginActivity() : changeLog())(pane, ctx);
+    };
+    view.querySelector('#au-tabs').onclick = (e) => { const b = e.target.closest('.tab'); if (b) show(b.dataset.t); };
+    await show('login');
+  };
 }
 
 /* ---------------- website messages ---------------- */

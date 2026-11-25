@@ -2,6 +2,7 @@
 import { sb } from './supabase.js';
 import { CONFIG } from './config.js';
 import { logEvent } from './api.js';
+import { recordLogin } from './login-log.js';
 
 export const ROLE_HOME = {
   super_admin: 'admin.html', school_admin: 'admin.html',
@@ -21,12 +22,13 @@ export async function getProfile(userId) {
 
 export async function signIn(email, password) {
   const { data, error } = await sb.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
-  if (error) throw error;
+  if (error) { await recordLogin(email, false); throw error; }
   const profile = await getProfile(data.user.id);
-  if (!profile) { await sb.auth.signOut(); throw new Error('No profile found for this account. Contact the school administrator.'); }
-  if (!profile.is_active) { await sb.auth.signOut(); throw new Error('This account is not active. Contact the school administrator.'); }
+  if (!profile) { await sb.auth.signOut(); await recordLogin(email, false); throw new Error('No profile found for this account. Contact the school administrator.'); }
+  if (!profile.is_active) { await sb.auth.signOut(); await recordLogin(email, false); throw new Error('This account is not active. Contact the school administrator.'); }
   sb.from('profiles').update({ last_login: new Date().toISOString() }).eq('id', profile.id).then(() => {}, () => {});
   logEvent('login', 'auth', { role: profile.role });
+  await recordLogin(email, true);
   return { user: data.user, profile };
 }
 

@@ -2,6 +2,8 @@
 import { CONFIG, isConfigured } from './config.js';
 import { sb } from './supabase.js';
 import { signIn, getProfile, homeFor, ROLE_LABEL } from './auth.js';
+import { warmGeo } from './login-log.js';
+warmGeo();
 import { $, $$, icon, LOGO, friendlyError, esc } from './ui.js';
 
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
