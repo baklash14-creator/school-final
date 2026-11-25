@@ -7,7 +7,9 @@ import { messagesView } from './messages.js';
 import { teacherTimetableView } from './timetable.js';
 import { quizManager } from './quizzes.js';
 import { libraryView } from './library.js';
-import { teacherLeave, teacherPayslips } from './staff.js';
+import { calendarView } from './calendar.js';
+import { teacherMeetings } from './meetings.js';
+import { myLeave } from './teacher-leave.js';
 import { conductManager, healthDirectory } from './wellbeing.js';
 import { attendanceTaker, scoreEntry, announcementsView, profileView } from './shared.js';
 import {
@@ -136,8 +138,9 @@ startPortal({
     { id: 'conduct', label: 'Conduct', icon: 'alert', render: (v, c) => conductManager({ teacher: true })(v, c) },
     { id: 'health', label: 'Student health', icon: 'shield', render: (v) => healthDirectory(v) },
     { id: 'library', label: 'Library', icon: 'book', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return libraryView(v, { teacherId: t.id }); } },
-    { id: 'leave', label: 'My leave', icon: 'calendar', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return teacherLeave(v, t); } },
-    { id: 'payslips', label: 'My payslips', icon: 'receipt', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return teacherPayslips(v, t); } },
+    { id: 'leave', label: 'Leave & payslips', icon: 'calendar', render: (v, c) => myLeave()(v, c) },
+    { id: 'meetings', label: 'Parent meetings', icon: 'users', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return teacherMeetings(v, t); } },
+    { id: 'calendar', label: 'School calendar', icon: 'calendar', render: calendarView },
     { id: 'messages', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: announcementsView },
     { id: 'profile', label: 'My profile', icon: 'user', render: profileView },

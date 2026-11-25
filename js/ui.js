@@ -96,7 +96,7 @@ const I = {
 export const icon = (name, size = 18) =>
   `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[name] || I.info}</svg>`;
 
-export const LOGO = `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#0E4D4A"/><path d="M32 11 51 19v15c0 10-8 17.500-19 20.500C21 51.500 13 44 13 34V19Z" fill="#E9A820"/><path d="M32 23v23M32 23c-4-3-9-3-13-2v18c4-1 9-1 13 2 4-3 9-3 13-2V21c-4-1-9-1-13 2Z" fill="none" stroke="#0E4D4A" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+export const LOGO = `<img src="assets/favicon.png" alt="" class="logo-img" width="64" height="64">`;
 
 /* ---------- toasts ---------- */
 export function toast(message, type = 'success', ms = 4200) {

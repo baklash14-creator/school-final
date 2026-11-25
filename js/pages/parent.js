@@ -4,6 +4,9 @@ import { startPortal } from '../portal-shell.js';
 import { must } from '../api.js';
 import { messagesView } from './messages.js';
 import { classTimetableView } from './timetable.js';
+import { calendarView } from './calendar.js';
+import { parentMeetings } from './meetings.js';
+import { certificatesView } from './certificates.js';
 import { quizResultsView } from './quizzes.js';
 import { libraryView } from './library.js';
 import { conductView, healthProfileView } from './wellbeing.js';
@@ -74,6 +77,9 @@ startPortal({
     { id: 'conduct', label: 'Conduct', icon: 'alert', render: forChild((v, c, k) => conductView(v, k.id)) },
     { id: 'health', label: 'Health', icon: 'shield', render: forChild((v, c, k) => healthProfileView(v, k.id, k.full_name, { canEdit: true })) },
     { id: 'fees', label: 'School fees', icon: 'wallet', render: forChild((v, c, k) => feesView(v, k.id, c)) },
+    { id: 'calendar', label: 'School calendar', icon: 'calendar', render: calendarView },
+    { id: 'meetings', label: 'Teacher meetings', icon: 'users', render: forChild((v, c, k) => parentMeetings(v, k)) },
+    { id: 'certificates', label: 'Certificates', icon: 'idcard', render: forChild((v, c, k) => certificatesView(v, k)) },
     { id: 'messages', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: announcementsView },
     { id: 'profile', label: 'My profile', icon: 'user', render: profileView },

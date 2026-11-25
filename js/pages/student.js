@@ -4,6 +4,9 @@ import { startPortal } from '../portal-shell.js';
 import { must } from '../api.js';
 import { messagesView } from './messages.js';
 import { classTimetableView } from './timetable.js';
+import { calendarView } from './calendar.js';
+import { studentMeetings } from './meetings.js';
+import { certificatesView } from './certificates.js';
 import { studentQuizzes } from './quizzes.js';
 import { libraryView } from './library.js';
 import { conductView, healthProfileView } from './wellbeing.js';
@@ -101,6 +104,9 @@ startPortal({
     { id: 'conduct', label: 'Conduct', icon: 'alert', render: wrap((v, c, s) => conductView(v, s.id)) },
     { id: 'health', label: 'Health', icon: 'shield', render: wrap((v, c, s) => healthProfileView(v, s.id, s.full_name)) },
     { id: 'fees', label: 'School fees', icon: 'wallet', render: wrap((v, c, s) => feesView(v, s.id, c)) },
+    { id: 'calendar', label: 'School calendar', icon: 'calendar', render: calendarView },
+    { id: 'meetings', label: 'Parent meetings', icon: 'users', render: wrap((v, c, s) => studentMeetings(v, s)) },
+    { id: 'certificates', label: 'Certificates', icon: 'idcard', render: wrap((v, c, s) => certificatesView(v, s)) },
     { id: 'messages', label: 'Messages', icon: 'message', render: messagesView },
     { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: announcementsView },
     { id: 'profile', label: 'My profile', icon: 'user', render: profileView },

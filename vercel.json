@@ -11,6 +11,10 @@
       ]
     },
     {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }, { "key": "Service-Worker-Allowed", "value": "/" }]
+    },
+    {
       "source": "/(admin|teacher|student|parent|login|reset).html",
       "headers": [{ "key": "Cache-Control", "value": "no-store" }]
     }

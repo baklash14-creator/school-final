@@ -1,0 +1,14 @@
+{
+  "name": "Alfrian Int'l Academy & Sec. Sch.",
+  "short_name": "AIASS",
+  "description": "School portal for administrators, teachers, students and parents",
+  "start_url": "login.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f5",
+  "theme_color": "#0e4d4a",
+  "icons": [
+    { "src": "assets/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
