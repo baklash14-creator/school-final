@@ -90,7 +90,6 @@ Sign in at `/login.html` as the Super Administrator, then:
 **Added in version 3:**
 - **Online quizzes** (`js/pages/quizzes.js`): teachers and admins build multiple-choice quizzes, set a time limit and an open window, and publish. Students take them in the portal with a countdown; marking is done by the database and the answer key is never sent to the browser while a quiz is open. Questions lock once anyone has attempted the quiz. Parents see quiz results.
 - **Library** (`js/pages/library.js`): book catalogue, lending to students or teachers, returns with optional fines, copies-available tracking, and overdue reminders (students, parents and teachers are notified, once a day). Students and teachers can browse the shelf; parents see their child's loans.
-- **Staff leave and payroll** (`js/pages/staff.js`): teachers request leave (Monday to Friday count) and admins approve or reject with a note. Salaries, payslips, mark-as-paid and printable payslips are in **Staff payroll**; teachers see only their own paid payslips. **Payroll is off by default for School Administrators:** the Super Administrator turns on **Staff payroll** for a person in **User accounts > shield icon**. The database enforces this too.
 - **Conduct, health and sickbay** (`js/pages/wellbeing.js`): teachers and admins record incidents and commendations (teachers only for students they teach; each can be hidden from parents). Parents keep their child's health profile up to date (allergies, conditions, emergency contacts); class teachers can read it. The office logs sickbay visits and the parents are notified.
 
 ## Roles and security
@@ -136,9 +135,7 @@ This code was syntax-checked and run in a browser against a mock of Supabase (ev
 12. With email/SMS keys set, use **Email, SMS, payments > Send test message**.
 13. Version 3: as a teacher build a quiz with two questions and publish it; as the student take it and see the score; check the student cannot take it twice.
 14. Lend a library book to a student; confirm the shelf count drops, then return it.
-15. As a School Administrator without the payroll permission confirm there is no **Staff payroll** menu; as Super Administrator tick it, create salaries, create payslips, mark paid, and confirm the teacher sees the payslip.
-16. As a teacher request leave; approve it as admin and check the notification.
-17. As a teacher record an incident for a student you teach (try one you do not teach; it must be refused); as the parent fill in the health profile and view the shared conduct note.
+15. As a teacher record an incident for a student you teach (try one you do not teach; it must be refused); as the parent fill in the health profile and view the shared conduct note.
 
 **Not run against live services:** the new features were tested in a browser against a mock of Supabase. Email, SMS and payment providers need your own accounts, so those paths, and storage uploads, have not been exercised end to end.
 

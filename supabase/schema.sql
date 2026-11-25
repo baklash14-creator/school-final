@@ -1494,213 +1494,6 @@ begin
   return n;
 end $$;
 
--- C. STAFF PAYROLL AND LEAVE ----------------------------------------------------------------
--- Payroll is sensitive, so unlike the other modules a school administrator does NOT get it
--- unless a super administrator switches it on (User accounts > shield icon).
-create or replace function public.has_payroll_access() returns boolean
-language sql stable security definer set search_path = public as $$
-  select public.is_admin() and (
-    public.auth_role() = 'super_admin'
-    or coalesce((select permissions ->> 'payroll' from public.profiles where id = auth.uid()), 'false') = 'true')
-$$;
-
--- Pay is only visible to administrators with the "payroll" module and to each teacher for
--- their own payslips once they are marked paid.
-create table if not exists public.staff_pay_profiles (
-  id          uuid primary key default gen_random_uuid(),
-  teacher_id  uuid not null unique references public.teachers(id) on delete cascade,
-  base_salary numeric(12,2) not null default 0 check (base_salary >= 0),
-  allowances  numeric(12,2) not null default 0 check (allowances >= 0),
-  deductions  numeric(12,2) not null default 0 check (deductions >= 0),
-  updated_at  timestamptz not null default now()
-);
-
-create table if not exists public.payslips (
-  id         uuid primary key default gen_random_uuid(),
-  teacher_id uuid not null references public.teachers(id) on delete cascade,
-  period     date not null check (period = date_trunc('month', period)::date),   -- first day of the month
-  basic      numeric(12,2) not null check (basic >= 0),
-  allowances numeric(12,2) not null default 0 check (allowances >= 0),
-  deductions numeric(12,2) not null default 0 check (deductions >= 0),
-  net        numeric(12,2) generated always as (basic + allowances - deductions) stored,
-  note       text check (char_length(note) <= 300),
-  status     text not null default 'draft' check (status in ('draft','paid')),
-  paid_on    date,
-  created_by uuid references auth.users(id) on delete set null,
-  created_at timestamptz not null default now(),
-  unique (teacher_id, period),
-  check (basic + allowances - deductions >= 0)
-);
-create index if not exists idx_payslips_period on public.payslips (period desc);
-
-alter table public.staff_pay_profiles enable row level security;
-alter table public.payslips           enable row level security;
-
-drop trigger if exists trg_paypro_upd on public.staff_pay_profiles;
-create trigger trg_paypro_upd before update on public.staff_pay_profiles
-  for each row execute function public.set_updated_at();
-
-create or replace function public.guard_payslip() returns trigger
-language plpgsql security definer set search_path = public as $$
-declare tp uuid;
-begin
-  if tg_op = 'UPDATE' and old.status = 'paid' then
-    if new.status <> 'paid' or new.basic <> old.basic or new.allowances <> old.allowances or new.deductions <> old.deductions
-       or new.teacher_id <> old.teacher_id or new.period <> old.period then
-      raise exception 'A payslip that has been paid cannot be changed';
-    end if;
-  end if;
-  if new.status = 'paid' and new.paid_on is null then new.paid_on := current_date; end if;
-  if new.status = 'draft' then new.paid_on := null; end if;
-  if tg_op = 'INSERT' then new.created_by := auth.uid(); end if;
-  return new;
-end $$;
-drop trigger if exists trg_guard_payslip on public.payslips;
-create trigger trg_guard_payslip before insert or update on public.payslips
-  for each row execute function public.guard_payslip();
-
-create or replace function public.after_payslip_paid() returns trigger
-language plpgsql security definer set search_path = public as $$
-begin
-  if new.status = 'paid' and (tg_op = 'INSERT' or old.status <> 'paid') then
-    perform public.add_notification((select profile_id from public.teachers where id = new.teacher_id),
-      'Your payslip is ready', 'Payslip for ' || to_char(new.period, 'FMMonth YYYY') || ' has been issued.', 'payroll', 'teacher.html#/payslips');
-  end if;
-  return null;
-end $$;
-drop trigger if exists trg_payslip_paid on public.payslips;
-create trigger trg_payslip_paid after insert or update on public.payslips
-  for each row execute function public.after_payslip_paid();
-
-drop policy if exists paypro_all     on public.staff_pay_profiles;
-drop policy if exists payslip_select on public.payslips;
-drop policy if exists payslip_insert on public.payslips;
-drop policy if exists payslip_update on public.payslips;
-drop policy if exists payslip_delete on public.payslips;
-create policy paypro_all on public.staff_pay_profiles for all to authenticated
-  using (public.has_payroll_access()) with check (public.has_payroll_access());
-create policy payslip_select on public.payslips for select to authenticated
-  using (public.has_payroll_access() or (status = 'paid' and teacher_id = public.my_teacher_id()));
-create policy payslip_insert on public.payslips for insert to authenticated with check (public.has_payroll_access());
-create policy payslip_update on public.payslips for update to authenticated using (public.has_payroll_access()) with check (public.has_payroll_access());
-create policy payslip_delete on public.payslips for delete to authenticated using (public.has_payroll_access() and status = 'draft');
-
--- One draft payslip per active teacher that has a pay profile, for the month of p_period
-create or replace function public.generate_payslips(p_period date) returns int
-language plpgsql security definer set search_path = public as $$
-declare n int;
-begin
-  if not public.has_payroll_access() then raise exception 'Not allowed'; end if;
-  insert into public.payslips (teacher_id, period, basic, allowances, deductions)
-  select p.teacher_id, date_trunc('month', p_period)::date, p.base_salary, p.allowances, p.deductions
-  from public.staff_pay_profiles p join public.teachers t on t.id = p.teacher_id
-  where t.status = 'active' and p.base_salary > 0
-  on conflict (teacher_id, period) do nothing;
-  get diagnostics n = row_count;
-  return n;
-end $$;
-
--- Mark every draft payslip of a month as paid (each teacher is notified)
-create or replace function public.mark_payslips_paid(p_period date, p_paid_on date default current_date) returns int
-language plpgsql security definer set search_path = public as $$
-declare n int;
-begin
-  if not public.has_payroll_access() then raise exception 'Not allowed'; end if;
-  update public.payslips set status = 'paid', paid_on = coalesce(p_paid_on, current_date)
-  where period = date_trunc('month', p_period)::date and status = 'draft';
-  get diagnostics n = row_count;
-  return n;
-end $$;
-
--- Leave: Monday to Friday only count as leave days
-create or replace function public.working_days(a date, b date) returns int
-language sql immutable as $$
-  select count(*)::int from generate_series(0, b - a) g where extract(isodow from (a + g)) < 6
-$$;
-
-create table if not exists public.leave_requests (
-  id          uuid primary key default gen_random_uuid(),
-  teacher_id  uuid not null references public.teachers(id) on delete cascade,
-  leave_type  text not null check (leave_type in ('annual','sick','maternity','paternity','compassionate','study','unpaid','other')),
-  start_date  date not null,
-  end_date    date not null,
-  days        int generated always as (public.working_days(start_date, end_date)) stored,
-  reason      text check (char_length(reason) <= 1000),
-  status      text not null default 'pending' check (status in ('pending','approved','rejected','cancelled')),
-  reviewed_by uuid references auth.users(id) on delete set null,
-  review_note text check (char_length(review_note) <= 500),
-  reviewed_at timestamptz,
-  created_at  timestamptz not null default now(),
-  check (end_date >= start_date),
-  check (end_date - start_date <= 365)
-);
-create index if not exists idx_leave_teacher on public.leave_requests (teacher_id, start_date desc);
-create index if not exists idx_leave_status  on public.leave_requests (status, created_at desc);
-alter table public.leave_requests enable row level security;
-
-create or replace function public.guard_leave() returns trigger
-language plpgsql security definer set search_path = public as $$
-begin
-  if not public.is_admin() then
-    if tg_op = 'INSERT' then
-      if new.teacher_id is distinct from public.my_teacher_id() then raise exception 'You can only request leave for yourself'; end if;
-      new.status := 'pending'; new.reviewed_by := null; new.reviewed_at := null; new.review_note := null;
-    else   -- a teacher may only cancel their own pending request
-      if old.status <> 'pending' or new.status <> 'cancelled' then raise exception 'Only a pending request can be cancelled'; end if;
-      new.teacher_id := old.teacher_id; new.leave_type := old.leave_type; new.start_date := old.start_date;
-      new.end_date := old.end_date; new.reason := old.reason; new.review_note := old.review_note;
-      new.reviewed_by := old.reviewed_by; new.reviewed_at := old.reviewed_at;
-    end if;
-  else
-    if tg_op = 'INSERT' and new.status in ('approved','rejected') then new.reviewed_by := auth.uid(); new.reviewed_at := now(); end if;
-    if tg_op = 'UPDATE' and old.status = 'pending' and new.status in ('approved','rejected') then new.reviewed_by := auth.uid(); new.reviewed_at := now(); end if;
-  end if;
-  if new.status in ('pending','approved') and exists (
-      select 1 from public.leave_requests l
-      where l.teacher_id = new.teacher_id and l.id is distinct from new.id and l.status in ('pending','approved')
-        and l.start_date <= new.end_date and new.start_date <= l.end_date) then
-    raise exception 'There is already a leave request covering some of these dates';
-  end if;
-  return new;
-end $$;
-drop trigger if exists trg_guard_leave on public.leave_requests;
-create trigger trg_guard_leave before insert or update on public.leave_requests
-  for each row execute function public.guard_leave();
-
-create or replace function public.after_leave_change() returns trigger
-language plpgsql security definer set search_path = public as $$
-declare who text; r record;
-begin
-  if tg_op = 'INSERT' and new.status = 'pending' then
-    select full_name into who from public.teachers where id = new.teacher_id;
-    for r in select p.id from public.profiles p where p.role in ('super_admin','school_admin') and p.is_active loop
-      perform public.add_notification(r.id, 'Leave request', coalesce(who, 'A teacher') || ' asked for ' || new.leave_type || ' leave ('
-        || to_char(new.start_date, 'DD Mon') || ' to ' || to_char(new.end_date, 'DD Mon YYYY') || ').', 'leave', 'admin.html#/leave');
-    end loop;
-  elsif tg_op = 'UPDATE' and old.status = 'pending' and new.status in ('approved','rejected') then
-    perform public.add_notification((select profile_id from public.teachers where id = new.teacher_id),
-      'Leave request ' || new.status, 'Your ' || new.leave_type || ' leave from ' || to_char(new.start_date, 'DD Mon') || ' to '
-        || to_char(new.end_date, 'DD Mon YYYY') || ' was ' || new.status || coalesce('. ' || new.review_note, '.'), 'leave', 'teacher.html#/leave');
-  end if;
-  return null;
-end $$;
-drop trigger if exists trg_leave_after on public.leave_requests;
-create trigger trg_leave_after after insert or update on public.leave_requests
-  for each row execute function public.after_leave_change();
-
-drop policy if exists leave_select on public.leave_requests;
-drop policy if exists leave_insert on public.leave_requests;
-drop policy if exists leave_update on public.leave_requests;
-drop policy if exists leave_delete on public.leave_requests;
-create policy leave_select on public.leave_requests for select to authenticated
-  using (public.is_admin() or teacher_id = public.my_teacher_id());
-create policy leave_insert on public.leave_requests for insert to authenticated
-  with check (public.is_admin() or (teacher_id = public.my_teacher_id() and status = 'pending'));
-create policy leave_update on public.leave_requests for update to authenticated
-  using (public.is_admin() or (teacher_id = public.my_teacher_id() and status = 'pending'))
-  with check (public.is_admin() or teacher_id = public.my_teacher_id());
-create policy leave_delete on public.leave_requests for delete to authenticated using (public.is_admin());
-
 -- D. DISCIPLINE, HEALTH AND SICK BAY --------------------------------------------------------
 create table if not exists public.discipline_records (
   id                uuid primary key default gen_random_uuid(),
@@ -1866,22 +1659,18 @@ revoke execute on function public.start_quiz(uuid)                  from public,
 revoke execute on function public.submit_quiz(uuid, jsonb)          from public, anon;
 revoke execute on function public.quiz_review(uuid, uuid)           from public, anon;
 revoke execute on function public.notify_overdue_loans()            from public, anon;
-revoke execute on function public.generate_payslips(date)           from public, anon;
-revoke execute on function public.mark_payslips_paid(date, date)    from public, anon;
 grant execute on function public.save_quiz_questions(uuid, jsonb)  to authenticated;
 grant execute on function public.start_quiz(uuid)                  to authenticated;
 grant execute on function public.submit_quiz(uuid, jsonb)          to authenticated;
 grant execute on function public.quiz_review(uuid, uuid)           to authenticated;
 grant execute on function public.notify_overdue_loans()            to authenticated;
-grant execute on function public.generate_payslips(date)           to authenticated;
-grant execute on function public.mark_payslips_paid(date, date)    to authenticated;
 
 -- F. AUDIT the new tables -----------------------------------------------------------------------
 do $$
 declare t text;
 begin
-  foreach t in array array['quizzes','library_books','library_loans','staff_pay_profiles','payslips',
-                           'leave_requests','discipline_records','student_health_profiles','sickbay_visits'] loop
+  foreach t in array array['quizzes','library_books','library_loans',
+                           'discipline_records','student_health_profiles','sickbay_visits'] loop
     execute format('drop trigger if exists trg_audit_%1$s on public.%1$I', t);
     execute format('create trigger trg_audit_%1$s after insert or update or delete on public.%1$I
                     for each row execute function public.audit_trigger()', t);
