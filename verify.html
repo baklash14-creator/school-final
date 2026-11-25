@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify a certificate | Bakarr School</title>
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    body { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); }
+    .vbox { width: min(520px, 100%); background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px; box-shadow: var(--shadow); }
+    .vbox h1 { font-size: 1.4rem; margin: 0 0 4px; } .vbox form { display: flex; gap: 8px; margin: 18px 0; } .vbox form .input { flex: 1; text-transform: uppercase; letter-spacing: .08em; }
+    .result { border-radius: 12px; padding: 16px; margin-top: 6px; } .result.ok { background: var(--ok-soft); } .result.bad { background: var(--bad-soft); }
+    .result h2 { margin: 0 0 6px; font-size: 1.1rem; } .result dl { margin: 10px 0 0; display: grid; gap: 6px; } .result dt { font-size: .75rem; text-transform: uppercase; color: var(--muted); } .result dd { margin: 0; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <main class="vbox">
+    <h1>Verify a certificate</h1>
+    <p class="muted">Enter the code printed under the QR code to check that a certificate was issued by the school.</p>
+    <form id="vf"><input class="input" id="vc" maxlength="20" placeholder="Certificate code" aria-label="Certificate code" autocomplete="off" required><button class="btn primary" type="submit">Check</button></form>
+    <div id="vr" aria-live="polite"></div>
+  </main>
+  <script type="module" src="js/verify.js"></script>
+</body>
+</html>

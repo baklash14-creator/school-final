@@ -11,6 +11,9 @@ import { quizManager } from './quizzes.js';
 import { adminLibrary } from './library.js';
 import { conductManager, healthDirectory, sickbayManager } from './wellbeing.js';
 import { lookup } from '../api.js';
+import { adminCalendar } from './calendar.js';
+import { adminCertificates } from './certificates.js';
+import { insights } from './admin-insights.js';
 import { alumni } from './admin-alumni.js';
 import { payroll, staffLeave } from './admin-payroll.js';
 
@@ -19,6 +22,7 @@ startPortal({
   home: 'overview',
   nav: [
     { id: 'overview', label: 'Overview', icon: 'grid', render: core.overview },
+    { id: 'insights', label: 'Insights', icon: 'chart', render: insights },
     { id: 'students', label: 'Students', icon: 'student', group: 'People', render: (v, c) => core.students(c)(v, c) },
     { id: 'teachers', label: 'Teachers', icon: 'teacher', render: (v, c) => core.teachers(c)(v, c) },
     { id: 'parents', label: 'Parents', icon: 'users', render: (v, c) => core.parents(c)(v, c) },
@@ -35,9 +39,11 @@ startPortal({
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: (v, c) => ops.scores()(v, c) },
     { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: (v, c) => quizManager({ classOptions: lookup('classes', 'name'), subjectOptions: lookup('subjects', 'name') })(v, c) },
     { id: 'library', label: 'Library', icon: 'book', render: (v, c) => adminLibrary()(v, c) },
+    { id: 'certificates', label: 'Certificates', icon: 'idcard', render: (v, c) => adminCertificates()(v, c) },
     { id: 'fees', label: 'School fees', icon: 'wallet', group: 'Finance', perm: 'fees', render: (v, c) => ops.fees()(v, c) },
     { id: 'payroll', label: 'Staff payroll', icon: 'wallet', perm: 'payroll', render: (v, c) => payroll()(v, c) },
-    { id: 'announcements', label: 'Announcements', icon: 'megaphone', group: 'Communication', render: (v, c) => ops.announcements()(v, c) },
+    { id: 'calendar', label: 'School calendar', icon: 'calendar', group: 'Communication', render: (v, c) => adminCalendar()(v, c) },
+    { id: 'announcements', label: 'Announcements', icon: 'megaphone', render: (v, c) => ops.announcements()(v, c) },
     { id: 'admissions', label: 'Admissions', icon: 'inbox', perm: 'admissions', render: (v, c) => ops.admissions(c)(v, c) },
     { id: 'alumni', label: 'Alumni', icon: 'users', render: (v, c) => alumni()(v, c) },
     { id: 'inbox', label: 'Messages', icon: 'message', render: messagesView },

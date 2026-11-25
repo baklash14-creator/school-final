@@ -4,6 +4,7 @@ import { CONFIG } from './config.js';
 import { guard, signOut, ROLE_LABEL, hasPerm } from './auth.js';
 import { $, $$, esc, icon, LOGO, initials, toast, loadingBlock, errorBlock, fmtDateTime } from './ui.js';
 import { must } from './api.js';
+import './pwa.js';
 
 export async function startPortal({ roles, nav, home }) {
   const { user, profile } = await guard(roles);

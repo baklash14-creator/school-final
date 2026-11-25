@@ -9,7 +9,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 | Public website | `index.html`, `css/site.css`, `js/site.js` |
 | Animated sign-in + password reset | `login.html`, `reset.html`, `css/auth.css`, `js/login.js` |
 | Portals | `admin.html`, `teacher.html`, `student.html`, `parent.html`, `js/pages/*.js`, `css/app.css` |
-| Database, security, storage | `supabase/schema.sql` (fresh install), `supabase/upgrade-v2.sql` (only if you already ran the first version), `supabase/upgrade-v3.sql` (only if you installed before version 3) |
+| Database, security, storage | `supabase/schema.sql` (fresh install), `supabase/upgrade-v2.sql` (only if you already ran the first version), `supabase/upgrade-v3.sql`, `supabase/upgrade-v4.sql` (each only if you installed before that version) |
 | Server functions | `supabase/functions/admin-users`, `notify-external` (email/SMS), `payment-webhook` (automatic online payments) |
 | Settings | `js/config.js` |
 | Hosting headers | `vercel.json` |
@@ -21,7 +21,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 ## 1. Create the Supabase project
 
 1. Go to supabase.com, create a project, and wait for it to finish starting.
-2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes versions 2 and 3; if you ran an older copy earlier, run `supabase/upgrade-v2.sql` and then `supabase/upgrade-v3.sql` instead; both can be run again safely), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
+2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes versions 2, 3 and 4; if you ran an older copy earlier, run `supabase/upgrade-v2.sql`, then `upgrade-v3.sql`, then `upgrade-v4.sql` instead; each can be run again safely), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
 3. **Authentication > Sign In / Providers > Email**: turn **off** "Allow new users to sign up". Accounts are created by administrators only. Email confirmation can stay on or off; accounts made by the admin are pre-confirmed.
 4. **Authentication > URL Configuration**: set **Site URL** to your live address (for example `https://bakarr-school.vercel.app`) and add `https://YOUR-DOMAIN/reset.html` to **Redirect URLs**. Password-reset emails need this.
 
@@ -92,6 +92,13 @@ Sign in at `/login.html` as the Super Administrator, then:
 - **Library** (`js/pages/library.js`): book catalogue, lending to students or teachers, returns with optional fines, copies-available tracking, and overdue reminders (students, parents and teachers are notified, once a day). Students and teachers can browse the shelf; parents see their child's loans.
 - **Conduct, health and sickbay** (`js/pages/wellbeing.js`): teachers and admins record incidents and commendations (teachers only for students they teach; each can be hidden from parents). Parents keep their child's health profile up to date (allergies, conditions, emergency contacts); class teachers can read it. The office logs sickbay visits and the parents are notified.
 
+**Added in version 4:**
+- **School calendar** (`js/pages/calendar.js`): a month view in every portal showing terms, exams, holidays and events. Administrators add events under **School calendar > Manage events**, choose who sees each one (everyone, teachers, students or parents) and can send a notification when saving.
+- **Parent-teacher meetings** (`js/pages/meetings.js`): teachers publish several back-to-back time slots at once; parents book one with a teacher of their child (one meeting per child per teacher) or cancel it again. Both sides get notifications; the database stops double bookings.
+- **Certificates with QR verification** (`js/pages/certificates.js`, `verify.html`): administrators issue certificates (merit, completion, attendance, conduct, sports); students and parents are notified and can print them. Every certificate has a code and a QR code that opens `verify.html`, a public page that confirms it is genuine or tells you it was revoked. The QR picture is drawn with the `qrcode-generator` library from cdnjs; without internet the printed address and code still work.
+- **Insights dashboard** (`js/pages/admin-insights.js`): enrolment, 30-day attendance by class, fees collected per month, fees still owed, grade spread and students with the most absences.
+- **Installable app** (`manifest.json`, `sw.js`, `js/pwa.js`): browsers offer "Install app". Pages open again without a connection from a saved copy of the site's own files; data from Supabase is never stored by the service worker. Requires HTTPS (Vercel provides it).
+
 ## Roles and security
 
 | Role | Can do |
@@ -136,6 +143,7 @@ This code was syntax-checked and run in a browser against a mock of Supabase (ev
 13. Version 3: as a teacher build a quiz with two questions and publish it; as the student take it and see the score; check the student cannot take it twice.
 14. Lend a library book to a student; confirm the shelf count drops, then return it.
 15. As a teacher record an incident for a student you teach (try one you do not teach; it must be refused); as the parent fill in the health profile and view the shared conduct note.
+16. Version 4: add a calendar event (tick the notification) and confirm each role sees only the events meant for it; as a teacher publish meeting slots, as the parent book one, then cancel it and watch both notifications; issue a certificate, open its `verify.html` link and revoke it to see the page change; open the site on a phone and choose Install app.
 
 **Not run against live services:** the new features were tested in a browser against a mock of Supabase. Email, SMS and payment providers need your own accounts, so those paths, and storage uploads, have not been exercised end to end.
 
