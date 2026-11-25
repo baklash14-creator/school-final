@@ -9,7 +9,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 | Public website | `index.html`, `css/site.css`, `js/site.js` |
 | Animated sign-in + password reset | `login.html`, `reset.html`, `css/auth.css`, `js/login.js` |
 | Portals | `admin.html`, `teacher.html`, `student.html`, `parent.html`, `js/pages/*.js`, `css/app.css` |
-| Database, security, storage | `supabase/schema.sql` (fresh install), `supabase/upgrade-v2.sql` (only if you already ran the first version), `supabase/upgrade-v3.sql`, `supabase/upgrade-v4.sql` (each only if you installed before that version) |
+| Database, security, storage | `supabase/schema.sql` (fresh install), `supabase/upgrade-v2.sql` (only if you already ran the first version), `supabase/upgrade-v3.sql`, `supabase/upgrade-v4.sql`, `supabase/upgrade-v5.sql` (each only if you installed before that version) |
 | Server functions | `supabase/functions/admin-users`, `notify-external` (email/SMS), `payment-webhook` (automatic online payments) |
 | Settings | `js/config.js` |
 | Hosting headers | `vercel.json` |
@@ -21,7 +21,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 ## 1. Create the Supabase project
 
 1. Go to supabase.com, create a project, and wait for it to finish starting.
-2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes versions 2, 3 and 4; if you ran an older copy earlier, run `supabase/upgrade-v2.sql`, then `upgrade-v3.sql`, then `upgrade-v4.sql` instead; each can be run again safely), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
+2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes versions 2 to 5; if you ran an older copy earlier, run `supabase/upgrade-v2.sql`, then `upgrade-v3.sql`, then `upgrade-v4.sql`, then `upgrade-v5.sql` instead; each can be run again safely), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
 3. **Authentication > Sign In / Providers > Email**: turn **off** "Allow new users to sign up". Accounts are created by administrators only. Email confirmation can stay on or off; accounts made by the admin are pre-confirmed.
 4. **Authentication > URL Configuration**: set **Site URL** to your live address (for example `https://bakarr-school.vercel.app`) and add `https://YOUR-DOMAIN/reset.html` to **Redirect URLs**. Password-reset emails need this.
 
@@ -99,6 +99,13 @@ Sign in at `/login.html` as the Super Administrator, then:
 - **Insights dashboard** (`js/pages/admin-insights.js`): enrolment, 30-day attendance by class, fees collected per month, fees still owed, grade spread and students with the most absences.
 - **Installable app** (`manifest.json`, `sw.js`, `js/pwa.js`): browsers offer "Install app". Pages open again without a connection from a saved copy of the site's own files; data from Supabase is never stored by the service worker. Requires HTTPS (Vercel provides it).
 
+**Added in version 5:**
+- **Scan attendance** (`js/pages/attendance-extra.js`): a scan station for pupils and staff. A USB barcode scanner reads the barcode on the ID card (it holds the student or staff number); typing the number and pressing Enter works too, and browsers that support it can use the camera. Arrivals after the "late after" time are marked late; a sound confirms each scan.
+- **Staff attendance**: daily register, monthly P/L/A/V report with Excel and PDF export, printable staff badges with a barcode, and a "My attendance" page for teachers. Only administrators can write staff attendance; each teacher sees only their own.
+- **BECE and WASSCE results** (`js/pages/national.js`): administrators enter index numbers and subject grades, see a per-subject report (credit passes for WASSCE) and export it. Students and parents see their own results.
+- **Past questions** (`js/pages/past-questions.js`): teachers and administrators upload papers (PDF, Word, JPG, PNG up to 15 MB) to a private storage bucket; every signed-in user can search and open them.
+- **Class grade sheets** (`js/pages/gradesheet.js`): per-subject averages, total, average, grade and position for a term or the whole year, printable and exportable. Administrators see every class; teachers see their own.
+
 ## Roles and security
 
 | Role | Can do |
@@ -144,6 +151,7 @@ This code was syntax-checked and run in a browser against a mock of Supabase (ev
 14. Lend a library book to a student; confirm the shelf count drops, then return it.
 15. As a teacher record an incident for a student you teach (try one you do not teach; it must be refused); as the parent fill in the health profile and view the shared conduct note.
 16. Version 4: add a calendar event (tick the notification) and confirm each role sees only the events meant for it; as a teacher publish meeting slots, as the parent book one, then cancel it and watch both notifications; issue a certificate, open its `verify.html` link and revoke it to see the page change; open the site on a phone and choose Install app.
+17. Version 5: print an ID card and scan its barcode at **Scan attendance** (check it lands in Attendance); do the same for a staff badge; enter a WASSCE result for a student and open it from the student's portal; upload a past paper as a teacher and open it as a student; open **Grade sheets** for a class that has scores.
 
 **Not run against live services:** the new features were tested in a browser against a mock of Supabase. Email, SMS and payment providers need your own accounts, so those paths, and storage uploads, have not been exercised end to end.
 
