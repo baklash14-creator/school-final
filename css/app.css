@@ -1,5 +1,5 @@
 /* =========================================================
-   Bakarr School - shared design system + dashboard layout
+   Alfrian Int'l Academy & Sec. Sch. - shared design system + dashboard layout
    ========================================================= */
 :root {
   --ink: #0f1f1e;
@@ -318,3 +318,6 @@ pre.json { background: #0f1f1e; color: #cfe8e4; padding: 14px; border-radius: 10
 .vbars { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; align-items: end; height: 190px; } .vbar { display: grid; grid-template-rows: auto 1fr auto; gap: 4px; height: 100%; text-align: center; font-size: 11px; }
 .vb-t { display: flex; align-items: flex-end; background: #f0f4f3; border-radius: 8px; overflow: hidden; } .vb-f { display: block; width: 100%; background: var(--brand-2); border-radius: 8px 8px 0 0; } .vb-v { color: var(--muted); min-height: 14px; font-variant-numeric: tabular-nums; } .vb-l { font-weight: 700; }
 .card.full { grid-column: 1 / -1; }
+
+/* school logo image (shield) */
+.logo-img { display: block; width: 100%; height: 100%; object-fit: contain; }

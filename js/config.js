@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------
-//  BAKARR SCHOOL - configuration
+//  ALFRIAN INT'L ACADEMY & SEC. SCH. - configuration
 //  1) Paste your Supabase URL and ANON (public) key below.
 //     Supabase Dashboard > Project Settings > API.
 //     NEVER put the service_role key in this file.
@@ -10,7 +10,7 @@ export const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_zIzeeT7lTCErY0131aEPuQ_Iu7-Iwjb',
 
   SCHOOL: {
-    name: 'Bakarr School',
+    name: "Alfrian Int'l Academy & Sec. Sch.",
     motto: 'Knowledge, character and service',
     email: 'info@bakarrschool.edu',
     phone: '+000 000 000 000',

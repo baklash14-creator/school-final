@@ -1,6 +1,6 @@
 {
-  "name": "Bakarr School",
-  "short_name": "Bakarr School",
+  "name": "Alfrian Int'l Academy & Sec. Sch.",
+  "short_name": "AIASS",
   "description": "School portal for administrators, teachers, students and parents",
   "start_url": "login.html",
   "scope": "./",

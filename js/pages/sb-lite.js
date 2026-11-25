@@ -82,7 +82,7 @@ export async function downloadPayslip({ name, staffNo, jobTitle }, slip) {
   const cur = (n) => money(n);
 
   doc.setFontSize(20); doc.setFont(undefined, 'bold');
-  doc.text('Bakarr School', 14, 20);
+  doc.text("Alfrian Int'l Academy & Sec. Sch.", 14, 20);
   doc.setFontSize(12); doc.setFont(undefined, 'normal');
   doc.text(`Payslip - ${monthLabel(slip.period)}`, 14, 28);
 

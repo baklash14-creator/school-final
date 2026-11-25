@@ -1,5 +1,5 @@
 /* =========================================================
-   Bakarr School - animated sign-in
+   Alfrian Int'l Academy & Sec. Sch. - animated sign-in
    ========================================================= */
 body.auth { min-height: 100vh; overflow-x: hidden; background: var(--bg); }
 .stage { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr); }

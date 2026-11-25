@@ -1,4 +1,4 @@
-# Bakarr School: school management website
+# Alfrian Int'l Academy & Sec. Sch.: school management website
 
 Public website, animated sign-in, and four role-based portals (administrator, teacher, student, parent) on **Supabase** (PostgreSQL, Auth, Storage, Row Level Security) with a plain HTML, CSS and JavaScript front end. There is no build step.
 
