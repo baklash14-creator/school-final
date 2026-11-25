@@ -11,6 +11,10 @@ import { quizManager } from './quizzes.js';
 import { adminLibrary } from './library.js';
 import { conductManager, healthDirectory, sickbayManager } from './wellbeing.js';
 import { lookup } from '../api.js';
+import { scanStation, staffAttendance } from './attendance-extra.js';
+import { nationalExams } from './national.js';
+import { pastQuestions } from './past-questions.js';
+import { gradeSheet } from './gradesheet.js';
 import { adminCalendar } from './calendar.js';
 import { adminCertificates } from './certificates.js';
 import { insights } from './admin-insights.js';
@@ -35,8 +39,13 @@ startPortal({
     { id: 'class-subjects', label: 'Class subjects', icon: 'clipboard', render: (v, c) => core.classSubjects()(v, c) },
     { id: 'timetable', label: 'Timetable', icon: 'table', render: (v, c) => adminTimetable()(v, c) },
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: (v, c) => ops.attendance()(v, c) },
+    { id: 'scan', label: 'Scan attendance', icon: 'camera', render: (v, c) => scanStation()(v, c) },
+    { id: 'staff-attendance', label: 'Staff attendance', icon: 'users', render: (v, c) => staffAttendance()(v, c) },
     { id: 'exams', label: 'Examinations', icon: 'file', render: (v, c) => ops.exams()(v, c) },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: (v, c) => ops.scores()(v, c) },
+    { id: 'gradesheets', label: 'Grade sheets', icon: 'table', render: (v, c) => gradeSheet()(v, c) },
+    { id: 'national', label: 'BECE and WASSCE', icon: 'file', render: (v, c) => nationalExams()(v, c) },
+    { id: 'past-questions', label: 'Past questions', icon: 'book', render: (v, c) => pastQuestions({ canUpload: true, isAdmin: true, userId: c.user.id })(v, c) },
     { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: (v, c) => quizManager({ classOptions: lookup('classes', 'name'), subjectOptions: lookup('subjects', 'name') })(v, c) },
     { id: 'library', label: 'Library', icon: 'book', render: (v, c) => adminLibrary()(v, c) },
     { id: 'certificates', label: 'Certificates', icon: 'idcard', render: (v, c) => adminCertificates()(v, c) },

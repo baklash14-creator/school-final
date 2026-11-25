@@ -321,3 +321,13 @@ pre.json { background: #0f1f1e; color: #cfe8e4; padding: 14px; border-radius: 10
 
 /* school logo image (shield) */
 .logo-img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* v5: scan station, matrices, grade sheet, national entry */
+.scan-card { display: grid; gap: 14px; } .scan-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; } .scan-in { flex: 1; min-width: 220px; }
+.scan-input { font-size: 20px; padding: 14px; letter-spacing: .06em; text-transform: uppercase; } .scan-vid { width: min(360px, 100%); border-radius: 12px; background: #000; }
+.scan-res { min-height: 64px; border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; background: #f0f4f3; } .scan-res b { font-size: 18px; } .scan-res.ok { background: var(--ok-soft); color: var(--ok); } .scan-res.bad { background: var(--bad-soft); color: var(--bad); }
+.att-matrix th, .att-matrix td { text-align: center; padding: 6px 4px; min-width: 26px; font-size: 12px; } .att-matrix td:first-child, .att-matrix th:first-child { text-align: left; min-width: 150px; position: sticky; left: 0; background: var(--surface); }
+.am { display: inline-block; width: 20px; line-height: 20px; border-radius: 5px; font-weight: 700; font-size: 11px; } .am.ok { background: var(--ok-soft); color: var(--ok); } .am.warn { background: var(--warn-soft); color: var(--warn); } .am.bad { background: var(--bad-soft); color: var(--bad); } .am.info { background: var(--info-soft); color: var(--info); }
+.gs-table th, .gs-table td { text-align: center; white-space: nowrap; } .gs-table td:nth-child(2), .gs-table th:nth-child(2) { text-align: left; }
+.nx-line { display: grid; grid-template-columns: 1fr 110px auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+@media print { .gradesheet .gs-table { font-size: 11px; } }

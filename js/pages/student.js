@@ -4,6 +4,8 @@ import { startPortal } from '../portal-shell.js';
 import { must } from '../api.js';
 import { messagesView } from './messages.js';
 import { classTimetableView } from './timetable.js';
+import { nationalResultsView } from './national.js';
+import { pastQuestions } from './past-questions.js';
 import { calendarView } from './calendar.js';
 import { studentMeetings } from './meetings.js';
 import { certificatesView } from './certificates.js';
@@ -99,6 +101,8 @@ startPortal({
     { id: 'timetable', label: 'Timetable', icon: 'table', render: wrap((v, c, s) => classTimetableView(v, s.class_id)) },
     { id: 'attendance', label: 'My attendance', icon: 'calendar', render: wrap((v, c, s) => attendanceView(v, s.id)) },
     { id: 'assignments', label: 'Assignments', icon: 'clipboard', render: assignments },
+    { id: 'national', label: 'BECE and WASSCE', icon: 'file', render: wrap((v, c, s) => nationalResultsView(v, s.id)) },
+    { id: 'past-questions', label: 'Past questions', icon: 'book', render: (v, c) => pastQuestions({ userId: c.user.id })(v, c) },
     { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: wrap((v, c, s) => studentQuizzes(v, c, s)) },
     { id: 'library', label: 'Library', icon: 'book', render: wrap((v, c, s) => libraryView(v, { studentId: s.id })) },
     { id: 'conduct', label: 'Conduct', icon: 'alert', render: wrap((v, c, s) => conductView(v, s.id)) },

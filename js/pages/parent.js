@@ -4,6 +4,7 @@ import { startPortal } from '../portal-shell.js';
 import { must } from '../api.js';
 import { messagesView } from './messages.js';
 import { classTimetableView } from './timetable.js';
+import { nationalResultsView } from './national.js';
 import { calendarView } from './calendar.js';
 import { parentMeetings } from './meetings.js';
 import { certificatesView } from './certificates.js';
@@ -72,6 +73,7 @@ startPortal({
     { id: 'results', label: 'Results', icon: 'file', render: forChild((v, c, k) => resultsView(v, k.id)) },
     { id: 'timetable', label: 'Timetable', icon: 'table', render: forChild((v, c, k) => classTimetableView(v, k.class_id)) },
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: forChild((v, c, k) => attendanceView(v, k.id)) },
+    { id: 'national', label: 'BECE and WASSCE', icon: 'file', render: forChild((v, c, k) => nationalResultsView(v, k.id)) },
     { id: 'quizzes', label: 'Quiz results', icon: 'list', render: forChild((v, c, k) => quizResultsView(v, k.id)) },
     { id: 'library', label: 'Library', icon: 'book', render: forChild((v, c, k) => libraryView(v, { studentId: k.id, browse: false })) },
     { id: 'conduct', label: 'Conduct', icon: 'alert', render: forChild((v, c, k) => conductView(v, k.id)) },

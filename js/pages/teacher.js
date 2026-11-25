@@ -7,6 +7,9 @@ import { messagesView } from './messages.js';
 import { teacherTimetableView } from './timetable.js';
 import { quizManager } from './quizzes.js';
 import { libraryView } from './library.js';
+import { myStaffAttendance } from './attendance-extra.js';
+import { pastQuestions } from './past-questions.js';
+import { gradeSheet } from './gradesheet.js';
 import { calendarView } from './calendar.js';
 import { teacherMeetings } from './meetings.js';
 import { myLeave } from './teacher-leave.js';
@@ -134,6 +137,9 @@ startPortal({
     { id: 'attendance', label: 'Attendance', icon: 'calendar', render: attendance },
     { id: 'scores', label: 'Enter scores', icon: 'edit', render: scores },
     { id: 'assignments', label: 'Assignments', icon: 'clipboard', render: assignmentsPage },
+    { id: 'gradesheets', label: 'Grade sheets', icon: 'table', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); const my = await myClasses(t); return gradeSheet({ classOptions: my.classes })(v, c); } },
+    { id: 'past-questions', label: 'Past questions', icon: 'book', render: (v, c) => pastQuestions({ canUpload: true, userId: c.user.id })(v, c) },
+    { id: 'my-attendance', label: 'My attendance', icon: 'clock', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); return myStaffAttendance(v, t); } },
     { id: 'quizzes', label: 'Online quizzes', icon: 'list', render: async (v, c) => { const t = await getTeacher(c); if (!t) return noRecord(v); const my = await myClasses(t); return quizManager({ teacher: t, classOptions: my.classes, subjectOptions: lookup('subjects', 'name') })(v, c); } },
     { id: 'conduct', label: 'Conduct', icon: 'alert', render: (v, c) => conductManager({ teacher: true })(v, c) },
     { id: 'health', label: 'Student health', icon: 'shield', render: (v) => healthDirectory(v) },
