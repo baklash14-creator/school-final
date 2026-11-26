@@ -167,3 +167,7 @@ All colours are CSS variables at the top of `css/app.css`. Replace `assets/logo.
 ## House-plan guide
 
 `plan.html` is a static floor-plan guide to the portal: each room is a module, with a role filter and links into each portal. `assets/house-plan.png` is a picture of it. Linked from the home page and sign-in page.
+
+## Smart apply (AI form fill)
+
+The admission form has a "Smart apply" box: paste a message and the form fills itself (never submits). Without setup it uses a basic on-device reader. For AI: `supabase functions deploy ai-fill --no-verify-jwt` and `supabase secrets set ANTHROPIC_API_KEY=...`. The function is public, so it limits text to 1500 characters and 5 requests per IP per minute; it stores nothing.

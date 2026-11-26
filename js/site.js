@@ -1,6 +1,7 @@
 // Public website: static content from config, live content from Supabase, forms
 import { CONFIG, isConfigured } from './config.js';
 import { sb } from './supabase.js';
+import { parseApplication } from './autofill.js';
 import { $, $$, esc, icon, LOGO, toast, fail, modal, setBusy, formHtml, readForm, fmtDate, initials } from './ui.js';
 
 const S = CONFIG.SCHOOL;
@@ -104,6 +105,20 @@ const adm = [
   { name: 'message', label: 'Anything else we should know?', type: 'textarea', rows: 3, full: true, maxlength: 1500 },
 ];
 $('#apply-form-host').innerHTML = formHtml(adm) + '<input class="hp" id="hp-site" tabindex="-1" autocomplete="off" aria-hidden="true">';
+$('#apply-form-host').insertAdjacentHTML('afterbegin', `<div class="smart-apply"><label for="sa-text"><b>Smart apply</b> <span class="muted">Paste or type the details (for example a message you already wrote) and we fill the form for you. You can still edit everything.</span></label>
+  <textarea class="input" id="sa-text" rows="3" maxlength="1500" placeholder="Name: Amina Kamara, born 14/05/2012, girl, applying for JSS 1. Parent: Musa Kamara 076 000 000"></textarea>
+  <button class="btn ghost sm" type="button" id="sa-go">Auto-fill the form</button></div>`);
+$('#sa-go').onclick = async (e) => {
+  const text = $('#sa-text').value;
+  if (text.trim().length < 5) return toast('Type or paste some details first.', 'error');
+  setBusy(e.currentTarget, true);
+  try {
+    const { fields, source } = await parseApplication(text);
+    const form = $('#apply-form-host form'); let n = 0;
+    for (const [k, v] of Object.entries(fields)) { const el = form.elements[k]; if (el && !el.value) { el.value = v; n++; } }
+    toast(n ? `Filled ${n} field${n === 1 ? '' : 's'}${source === 'ai' ? ' with AI' : ''}. Please check them before submitting.` : 'Nothing new found. Fields already filled were left alone.', n ? 'success' : 'info');
+  } catch (er) { fail(er); } finally { setBusy(e.currentTarget, false); }
+};
 const cooldown = (key, ms) => { try { const t = Number(localStorage.getItem(key) || 0); if (Date.now() - t < ms) return Math.ceil((ms - (Date.now() - t)) / 1000); localStorage.setItem(key, Date.now()); } catch { /* ignore */ } return 0; };
 const refCode = () => 'APP-' + [...crypto.getRandomValues(new Uint8Array(8))].map((n) => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n % 32]).join('');
 
