@@ -1,5 +1,5 @@
 -- =====================================================================
---  BAKARR SCHOOL - VERSION 4 ADDITIONS
+--  ALFRIAN INT'L ACADEMY - VERSION 4 ADDITIONS
 --  * Fresh install: this is already appended to schema.sql, run schema.sql only.
 --  * Existing install (you already ran schema.sql with version 3): run THIS file once.
 --  Adds: school calendar and events, parent-teacher meeting booking,

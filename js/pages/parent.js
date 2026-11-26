@@ -29,7 +29,7 @@ async function getKids(ctx) {
   }
   return kids;
 }
-const KEY = 'bakarr_child';
+const KEY = 'aiass_child';
 const selected = (list) => { let id = null; try { id = sessionStorage.getItem(KEY); } catch { /* ignore */ } return list.find((k) => k.id === id) || list[0]; };
 
 // Renders a child switcher (when needed) then calls fn(container, child)

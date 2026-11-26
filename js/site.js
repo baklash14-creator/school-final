@@ -14,12 +14,13 @@ document.title = `${S.name} | ${S.motto}`;
 $('#t-motto').textContent = S.motto; $('#f-motto').textContent = S.motto;
 $('#t-hours').textContent = S.hours;
 $('#t-phone').textContent = S.phone; $('#t-mail').textContent = S.email;
+if (!S.email) { $('#t-mail').hidden = true; $('#c-mail').parentElement.parentElement.hidden = true; }
 $('#c-addr').textContent = S.address; $('#c-hours').textContent = S.hours;
 $('#c-phone').textContent = S.phone; $('#c-mail').innerHTML = `<a href="mailto:${esc(S.email)}">${esc(S.email)}</a>`;
 $('#yr').textContent = new Date().getFullYear();
 $('#burger').innerHTML = icon('menu', 22);
 
-const colors = ['#e9a820', '#2bb3a8', '#17706a', '#c23b3b', '#2b69b0'];
+const colors = ['#e9a820', '#4f7bdc', '#2147a6', '#c23b3b', '#2b69b0'];
 $('#levels').innerHTML = CONFIG.LEVELS.map((l, i) => `<article class="s-level reveal" style="--lv:${colors[i % colors.length]}"><h3>${esc(l.name)}</h3><p class="ages">${esc(l.ages)}</p><p>${esc(l.text)}</p></article>`).join('');
 
 /* ---------- header, menu, reveal ---------- */

@@ -34,7 +34,7 @@ export async function signIn(email, password) {
 
 export async function signOut(message) {
   try { await sb.auth.signOut(); } catch { /* ignore */ }
-  try { if (message) sessionStorage.setItem('bakarr_msg', message); } catch { /* ignore */ }
+  try { if (message) sessionStorage.setItem('aiass_msg', message); } catch { /* ignore */ }
   location.replace('login.html');
 }
 

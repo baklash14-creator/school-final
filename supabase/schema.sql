@@ -1,5 +1,5 @@
 -- =====================================================================
---  BAKARR SCHOOL  -  Supabase / PostgreSQL schema
+--  ALFRIAN INT'L ACADEMY  -  Supabase / PostgreSQL schema
 --  Run this whole file once in:  Supabase Dashboard > SQL Editor > New query
 --  Safe to read top to bottom. Sections:
 --    1. Extensions & sequences        6. Triggers (audit, guards, notices)

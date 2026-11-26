@@ -1,7 +1,7 @@
 // Service worker: makes the portals installable and lets pages open without a connection.
 // Strategy: network first, fall back to the saved copy. Only this site's own files are saved;
 // data from Supabase and every other website always goes straight to the network, so nothing private is stored here.
-const CACHE = 'bakarr-shell-v1';
+const CACHE = 'aiass-shell-v1';
 const OFFLINE_FILES = ['login.html', 'css/app.css', 'css/auth.css', 'assets/favicon.png'];
 
 self.addEventListener('install', (e) => {

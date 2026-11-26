@@ -1,5 +1,5 @@
 -- =====================================================================
---  BAKARR SCHOOL - VERSION 3 ADDITIONS
+--  ALFRIAN INT'L ACADEMY - VERSION 3 ADDITIONS
 --  * Fresh install: this is already appended to schema.sql, run schema.sql only.
 --  * Existing install (you already ran schema.sql with version 2): run THIS file once.
 --  Adds: online quizzes (auto-marked), library,

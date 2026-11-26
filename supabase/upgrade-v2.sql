@@ -1,5 +1,5 @@
 -- =====================================================================
---  BAKARR SCHOOL - VERSION 2 ADDITIONS
+--  ALFRIAN INT'L ACADEMY - VERSION 2 ADDITIONS
 --  * Fresh install: this is already appended to schema.sql, run schema.sql only.
 --  * Existing install (you already ran the first schema.sql): run THIS file once.
 --  Adds: several guardians per student, timetable, in-app messages,

@@ -12,7 +12,7 @@ export const CONFIG = {
   SCHOOL: {
     name: "Alfrian Int'l Academy & Sec. Sch.",
     motto: 'Knowledge, character and service',
-    email: 'info@bakarrschool.edu',
+    email: '', // add the school's real address, e.g. 'info@yourschool.edu.sl' (hidden on the site while empty)
     phone: '+000 000 000 000',
     address: 'Add your school address in js/config.js',
     hours: 'Monday to Friday, 7:30 am to 4:00 pm',

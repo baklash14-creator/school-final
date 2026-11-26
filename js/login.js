@@ -103,7 +103,7 @@ if (!isConfigured()) {
   const s = $('#setup'); s.hidden = false;
   s.innerHTML = `<div class="notice" style="margin:0">${icon('info', 18)}<span><b>Almost there.</b> Add your Supabase project URL and anon key in <code>js/config.js</code> to enable sign-in.</span></div>`;
 }
-try { const m = sessionStorage.getItem('bakarr_msg'); if (m) { show($('#msg'), 'info', m); sessionStorage.removeItem('bakarr_msg'); } } catch { /* ignore */ }
+try { const m = sessionStorage.getItem('aiass_msg'); if (m) { show($('#msg'), 'info', m); sessionStorage.removeItem('aiass_msg'); } } catch { /* ignore */ }
 
 /* ---------- success transition ---------- */
 let leaving = false;

@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     const { data: people } = await admin.from('profiles').select('email,phone,full_name').in('id', ids);
 
     const resendKey = Deno.env.get('RESEND_API_KEY');
-    const from = Deno.env.get('EMAIL_FROM') ?? 'Bakarr School <onboarding@resend.dev>';
+    const from = Deno.env.get('EMAIL_FROM') ?? "Alfrian Int'l Academy <onboarding@resend.dev>";
     const twSid = Deno.env.get('TWILIO_ACCOUNT_SID');
     const twToken = Deno.env.get('TWILIO_AUTH_TOKEN');
     const twFrom = Deno.env.get('TWILIO_FROM');
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
         const r = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from, to: [p.email], subject: title, text: `${body ?? ''}\n\n- Bakarr School` }),
+          body: JSON.stringify({ from, to: [p.email], subject: title, text: `${body ?? ''}\n\n- Alfrian Int'l Academy & Sec. Sch.` }),
         });
         if (r.ok) emails++; else errors.push('Email: ' + (await r.text()).slice(0, 160));
       }

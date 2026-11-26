@@ -23,7 +23,7 @@ Public website, animated sign-in, and four role-based portals (administrator, te
 1. Go to supabase.com, create a project, and wait for it to finish starting.
 2. Open **SQL Editor > New query**, paste the whole of `supabase/schema.sql` (already includes versions 2 to 6; if you ran an older copy earlier, run `supabase/upgrade-v2.sql`, then `upgrade-v3.sql`, then `upgrade-v4.sql`, then `upgrade-v5.sql`, then `upgrade-v6.sql` instead; each can be run again safely), and press **Run**. It creates every table, index, relationship, Row Level Security policy, trigger, storage bucket and one academic year (`2026/2027`). It adds no fake students or staff.
 3. **Authentication > Sign In / Providers > Email**: turn **off** "Allow new users to sign up". Accounts are created by administrators only. Email confirmation can stay on or off; accounts made by the admin are pre-confirmed.
-4. **Authentication > URL Configuration**: set **Site URL** to your live address (for example `https://bakarr-school.vercel.app`) and add `https://YOUR-DOMAIN/reset.html` to **Redirect URLs**. Password-reset emails need this.
+4. **Authentication > URL Configuration**: set **Site URL** to your live address (for example `https://your-school.vercel.app`) and add `https://YOUR-DOMAIN/reset.html` to **Redirect URLs**. Password-reset emails need this.
 
 ## 2. Create the first Super Administrator
 
