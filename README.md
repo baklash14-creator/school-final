@@ -171,3 +171,7 @@ All colours are CSS variables at the top of `css/app.css`. Replace `assets/logo.
 ## Smart apply (AI form fill)
 
 The admission form has a "Smart apply" box: paste a message and the form fills itself (never submits). Without setup it uses a basic on-device reader. For AI: `supabase functions deploy ai-fill --no-verify-jwt` and `supabase secrets set ANTHROPIC_API_KEY=...`. The function is public, so it limits text to 1500 characters and 5 requests per IP per minute; it stores nothing.
+
+## Backup and import
+
+Admin menu, Backup and import (needs the `users` permission): download any main table as CSV or everything as one JSON file, and bulk-add pupils from a CSV (template provided; validates rows, skips duplicates by name and birth date, max 1000 rows). No database change needed.
