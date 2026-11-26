@@ -7,6 +7,7 @@ import * as sys from './admin-system.js';
 import { adminTimetable } from './timetable.js';
 import { messagesView } from './messages.js';
 import { settingsView } from './settings.js';
+import { backupAndImport } from './backup.js';
 import { quizManager } from './quizzes.js';
 import { adminLibrary } from './library.js';
 import { conductManager, healthDirectory, sickbayManager } from './wellbeing.js';
@@ -60,6 +61,7 @@ startPortal({
     { id: 'gallery', label: 'Photo gallery', icon: 'image', render: (v, c) => sys.gallery()(v, c) },
     { id: 'reports', label: 'Reports', icon: 'chart', group: 'System', render: (v, c) => sys.reports(c)(v, c) },
     { id: 'settings', label: 'Email, SMS, payments', icon: 'send', perm: 'users', render: settingsView },
+    { id: 'backup', label: 'Backup and import', icon: 'download', perm: 'users', render: (v, c) => backupAndImport()(v, c) },
     { id: 'users', label: 'User accounts', icon: 'shield', perm: 'users', render: (v, c) => sys.users()(v, c) },
     { id: 'audit', label: 'Audit logs', icon: 'list', perm: 'audit', render: (v, c) => sys.audit()(v, c) },
     { id: 'profile', label: 'My profile', icon: 'user', render: profileView },
