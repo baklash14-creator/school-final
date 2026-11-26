@@ -162,3 +162,8 @@ This code was syntax-checked and run in a browser against a mock of Supabase (ev
 ## Customising
 
 All colours are CSS variables at the top of `css/app.css`. Replace `assets/logo.svg` with your own logo (and the inline copy in `js/ui.js` as `LOGO`).
+
+
+## House-plan guide
+
+`plan.html` is a static floor-plan guide to the portal: each room is a module, with a role filter and links into each portal. `assets/house-plan.png` is a picture of it. Linked from the home page and sign-in page.

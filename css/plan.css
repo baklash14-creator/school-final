@@ -1,0 +1,21 @@
+:root{--brand:#14307a;--brand-2:#2147a6;--gold:#e0a82e;--ink:#1b2438;--mut:#5b6784;--bg:#f4f6fb;--line:#c9d2e6}
+*{box-sizing:border-box}body{margin:0;font-family:"Plus Jakarta Sans",system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+.pl-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.pl-brand{display:flex;align-items:center;gap:10px;color:var(--brand);text-decoration:none}.pl-brand img{width:34px;height:34px}
+.pl-btn{display:inline-block;background:var(--brand);color:#fff;text-decoration:none;padding:9px 14px;border-radius:8px;font-weight:600;font-size:14px}.pl-btn.sm{padding:6px 10px;font-size:13px}
+.pl-wrap{max-width:1100px;margin:0 auto;padding:24px 16px}h1{margin:0 0 6px;color:var(--brand)}.pl-lead{color:var(--mut);max-width:60ch}
+.pl-roles{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.pl-roles button{border:1px solid var(--line);background:#fff;padding:7px 14px;border-radius:99px;cursor:pointer;font:inherit}.pl-roles .on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.pl-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+.pl-house{position:relative;display:grid;gap:6px;padding:38px 10px 40px;background:#fff;border:6px solid var(--brand);border-radius:6px;
+ grid-template-columns:repeat(4,1fr);grid-template-areas:"front front princ princ" "bursar staff staff class" "exam exam lib class" "sick disc hall hall" "lounge lounge cert cert" "gate gate gate gate"}
+.pl-roof{position:absolute;top:8px;left:12px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.room{min-height:92px;border:2px solid var(--brand-2);background:#eaf0ff;border-radius:4px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;cursor:pointer;font:inherit;color:var(--brand)}
+.room b{font-size:14px}.room small{color:var(--mut);font-size:11px;letter-spacing:.15em}
+.room:hover{background:#dbe5ff}.room.sel{background:var(--brand);color:#fff;border-color:var(--gold)}.room.sel small{color:#d7e0ff}.room.dim{opacity:.28}
+.a-front{grid-area:front}.a-princ{grid-area:princ}.a-bursar{grid-area:bursar}.a-staff{grid-area:staff}.a-class{grid-area:class}.a-exam{grid-area:exam}.a-lib{grid-area:lib}.a-sick{grid-area:sick}.a-disc{grid-area:disc}.a-hall{grid-area:hall}.a-lounge{grid-area:lounge}.a-cert{grid-area:cert}.a-gate{grid-area:gate;background:#fff6dc;border-color:var(--gold);min-height:70px}
+.a-gate.sel{background:var(--brand)}
+.pl-door{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.pl-panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;position:sticky;top:12px}.pl-panel h2{margin:0 0 4px;color:var(--brand)}
+.who{color:var(--mut);font-size:13px}.pl-panel ol{padding-left:20px;line-height:1.55}.pl-links{display:flex;flex-wrap:wrap;gap:6px}
+.pl-foot{color:var(--mut);margin-top:20px}
+@media(max-width:800px){.pl-layout{grid-template-columns:1fr}.pl-panel{position:static}.pl-house{display:flex;flex-direction:column}.room{min-height:56px}.pl-door{display:none}.pl-roof{position:static;margin-bottom:6px}}
